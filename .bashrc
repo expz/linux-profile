@@ -5,6 +5,8 @@
 #
 # Author: Jonathan Skowera
 #
+# Currenty configured with JAVA_HOME for Oracle JDK 7
+#
 
 ##################################################
 # Environment Variables
@@ -18,11 +20,32 @@ $HOME/opt/android-studio/sdk/tools:\
 $HOME/opt/sbison/bin:\
 $HOME/opt/sflex/bin
 
-# The next line updates PATH for the Google Cloud SDK.
-source '/home/user/opt/google-cloud-sdk/path.bash.inc'
+extrapath=' \
+bin \
+node_modules/.bin \
+src/gocode/bin \
+opt/android/studio/bin \
+opt/android-studio/sdk/tools \
+opt/sbison/bin \
+opt/sflex/bin \
+'
 
-# The next line enables bash completion for gcloud.
-source '/home/user/opt/google-cloud-sdk/completion.bash.inc'
+for dn in $extrapath; do
+  if [ -e "$HOME/$extrapath" ]; then
+    export PATH="$PATH:$HOME/$dn"
+  fi
+done
+
+extrasource=' \
+opt/google-cloud-sdk/path.bash.inc \
+opt/google-cloud-sdk/completion.bash.inc \
+'
+
+for fn in $extrasource; do
+  if [ -e "$HOME/$fn" ]; then
+    source "$HOME/$fn"
+  fi
+done
 
 export GOPATH=$HOME/src/gocode
 
