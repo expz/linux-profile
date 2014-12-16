@@ -18,7 +18,7 @@ set nocompatible
 filetype off
 
 " Set runtime path to include Vundle
-set rtp+=~/.vim/bundle/Vundle.vim
+set rtp+=~/.vundle
 
 " BEGIN PLUGINS
 call vundle#begin('~/.vim/bundle/')
@@ -51,41 +51,41 @@ call vundle#begin('~/.vim/bundle/')
 
 " Plugin 'file:///home/user/.vim/bundle/accelerated-smooth-scroll'
 " Plugin 'file:///home/user/.vim/bundle/ack.vim'
-Plugin 'file:///home/user/.vim/bundle/auctex.vim'
+" Plugin 'file:///home/user/.vim/bundle/auctex.vim'
 " Plugin 'file:///home/user/.vim/bundle/calendar.vim'
-Plugin 'file:///home/user/.vim/bundle/Command-T'
-Plugin 'file:///home/user/.vim/bundle/conqueterm-vim'
+" Plugin 'file:///home/user/.vim/bundle/Command-T'
+" Plugin 'file:///home/user/.vim/bundle/conqueterm-vim'
 " Plugin 'file:///home/user/.vim/bundle/csapprox'
 " Plugin 'file:///home/user/.vim/bundle/gundo.vim'
 " Plugin 'file:///home/user/.vim/bundle/inline_edit.vim'
 " Plugin 'file:///home/user/.vim/bundle/LaTeX-Box'
 " Plugin 'file:///home/user/.vim/bundle/nerdtree'
-Plugin 'file:///home/user/.vim/bundle/numbers.vim'
+" Plugin 'file:///home/user/.vim/bundle/numbers.vim'
 " Plugin 'file:///home/user/.vim/bundle/pydoc.vim'
 " Plugin 'file:///home/user/.vim/bundle/ropevim'
-Plugin 'file:///home/user/.vim/bundle/sbt-vim'
+" Plugin 'file:///home/user/.vim/bundle/sbt-vim'
 " OLD Plugin 'file:///home/user/.vim/bundle/supertab'
-Plugin 'file:///home/user/.vim/bundle/syntastic'
+" Plugin 'file:///home/user/.vim/bundle/syntastic'
 " Plugin 'file:///home/user/.vim/bundle/tabman.vim'
 " Plugin 'file:///home/user/.vim/bundle/taglist'
 " Plugin 'file:///home/user/.vim/bundle/tlib_vim'
 " Plugin 'file:///home/user/.vim/bundle/vim-addon-mw-utils'
 " Plugin 'file:///home/user/.vim/bundle/vim-bundle-mako'
-Plugin 'file:///home/user/.vim/bundle/vim-commentary'
+" Plugin 'file:///home/user/.vim/bundle/vim-commentary'
 " Plugin 'file:///home/user/.vim/bundle/VimExplorer'
-Plugin 'file:///home/user/.vim/bundle/vim-flake8'
-Plugin 'file:///home/user/.vim/bundle/vim-fugitive'
-Plugin 'file:///home/user/.vim/bundle/vim-pandoc'
-Plugin 'file:///home/user/.vim/bundle/vim-pandoc-syntax'
-Plugin 'file:///home/user/.vim/bundle/vim-vinegar'
-Plugin 'file:///home/user/.vim/bundle/vim-scala'
-Plugin 'file:///home/user/.vim/bundle/vim-scalaConceal'
+" Plugin 'file:///home/user/.vim/bundle/vim-flake8'
+" Plugin 'file:///home/user/.vim/bundle/vim-fugitive'
+" Plugin 'file:///home/user/.vim/bundle/vim-pandoc'
+" Plugin 'file:///home/user/.vim/bundle/vim-pandoc-syntax'
+" Plugin 'file:///home/user/.vim/bundle/vim-vinegar'
+" Plugin 'file:///home/user/.vim/bundle/vim-scala'
+" Plugin 'file:///home/user/.vim/bundle/vim-scalaConceal'
 " Plugin 'file:///home/user/.vim/bundle/vim-sneak'
 "  Plugin 'file:///home/user/.vim/bundle/vim-snipmate'
 " Plugin 'file:///home/user/.vim/bundle/vim-snippets'
 " Plugin 'file:///home/user/.vim/bundle/vimoutliner'
 " Plugin 'file:///home/user/.vim/bundle/vimwiki'
-Plugin 'file:///home/user/.vim/bundle/YouCompleteMe'
+" Plugin 'file:///home/user/.vim/bundle/YouCompleteMe'
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""
 " Remote versions
@@ -93,43 +93,42 @@ Plugin 'file:///home/user/.vim/bundle/YouCompleteMe'
 
 " Plugin 'gmarik/Vundle.vim'
 
-" Plugin 'vim-scripts/auctex.vim'  " TeX highlighting
+Plugin 'vim-scripts/auctex.vim'  " TeX highlighting
 " Plugin 'yonchu/accelerated-smooth-scroll'  " Smooth scrolling
 " Plugin 'mileszs/ack.vim'  " Use ack from vim
 " Plugin 'itchyny/calendar.vim'  " (Google) Calendar access
-" Plugin 'wincent/Command-T'  " Fast file navigation but few features (requires manual compilation step)
-" Plugin 'godlygeek/csapprox'  " Make GUI color schemes work in terminal
-" Plugin 'pthrasher/conqueterm-vim'  " Use shell from vim
+Plugin 'wincent/Command-T'  " Fast file navigation but few features (requires manual compilation step)
+Plugin 'pthrasher/conqueterm-vim'  " Use shell from vim
 " Plugin 'sjl/gundo.vim'  " Visualize undo tree
 " Plugin 'AndrewRadev/inline_edit.vim'  " Extract javascript from HTML to new buffer
 " Plugin 'LaTeX-Box-Team/LaTeX-Box'  " LaTeX commands
 " Plugin 'scrooloose/nerdtree'  " File navigation
-" Plugin 'myusuf3/numbers.vim'  " Better line numbers
+Plugin 'myusuf3/numbers.vim'  " Better line numbers
 " Plugin 'vim-scripts/pydoc.vim'  " Search Python documentation
 " Plugin 'python-rope/ropevim'  " rope Python refactoring library
-" Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
+Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
 "" OLD Plugin 'ervandrew/supertab'  " auto-completion using Tab
-" Plugin 'scrooloose/syntastic'  " Syntax checking
+Plugin 'scrooloose/syntastic'  " Syntax checking
 " Plugin 'kien/tabman.vim'  " Close tabs without switching to them
 " Plugin 'vim-scripts/taglist.vim'  " Overview of structure of source code files
 " Plugin 'tomtom/tlib_vim'  " Lib required for SnipMate Python snippets
 " Plugin 'MarcWeber/vim-addon-mw-utils'  " Utils required for SnipMate
 " Plugin 'sophacles/vim-bundle-mako'  " Python template library
-" Plugin 'tpope/vim-commentary'  " Light-weight comment out lines
+Plugin 'tpope/vim-commentary'  " Light-weight comment out lines
 " Plugin 'mbbill/VimExplorer'  " Powerful file manager
-" Plugin 'nvie/vim-flake8'  " Python syntax/style checker
-" Plugin 'tpope/vim-fugitive'  " GIT repositories
-" Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
-" Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
-" Plugin 'derekwyatt/vim-scala'  " Scala
-" Plugin 'mpollmeier/vim-scalaConceal'  " Allow UTF-8 method names for Scala
-" Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
+Plugin 'nvie/vim-flake8'  " Python syntax/style checker
+Plugin 'tpope/vim-fugitive'  " GIT repositories
+Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
+Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
+Plugin 'derekwyatt/vim-scala'  " Scala
+Plugin 'mpollmeier/vim-scalaConceal'  " Allow UTF-8 method names for Scala
+Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
 " Plugin 'justinmk/vim-sneak'  " Best seeking library
 " Plugin 'garbas/vim-snipmate'  " Insert Python snippets
 " Plugin 'honza/vim-snippets'  " Collection of snippets
 " Plugin 'vimoutliner/vimoutliner'  " Write outlines, to-do list, etc
 " Plugin 'vimwiki/vimwiki'  " Wiki editor
-" Plugin 'Valloric/YouCompleteMe'  " Auto-completion and omnibox
+Plugin 'Valloric/YouCompleteMe'  " Auto-completion and omnibox
 
 call vundle#end()
 " END PLUGINS
