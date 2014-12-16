@@ -1,6 +1,5 @@
 # Other git repositories #
-**/.git/
-.vim/**/.gitignore
+.vim/bundle/
 
 # Compiled source #
 ###################
