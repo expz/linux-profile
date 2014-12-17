@@ -11,25 +11,25 @@
 ##################################################
 # Environment Variables
 
-extrapath=' \
-bin \
-node_modules/.bin \
-src/gocode/bin \
-opt/android/studio/bin \
-opt/android-studio/sdk/tools \
-opt/sbison/bin \
-opt/sflex/bin \
+extrapath='
+bin
+node_modules/.bin
+src/gocode/bin
+opt/android/studio/bin
+opt/android-studio/sdk/tools
+opt/sbison/bin
+opt/sflex/bin
 '
 
 for dn in $extrapath; do
-  if [ -e "$HOME/$extrapath" ]; then
+  if [ -e "$HOME/$dn" ]; then
     export PATH="$PATH:$HOME/$dn"
   fi
 done
 
-extrasource=' \
-opt/google-cloud-sdk/path.bash.inc \
-opt/google-cloud-sdk/completion.bash.inc \
+extrasource='
+opt/google-cloud-sdk/path.bash.inc
+opt/google-cloud-sdk/completion.bash.inc
 '
 
 for fn in $extrasource; do
