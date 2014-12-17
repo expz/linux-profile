@@ -11,15 +11,6 @@
 ##################################################
 # Environment Variables
 
-export PATH=$PATH:\
-$HOME/bin:\
-$HOME/node_modules/.bin:\
-$HOME/src/gocode/bin:\
-$HOME/opt/android-studio/bin:\
-$HOME/opt/android-studio/sdk/tools:\
-$HOME/opt/sbison/bin:\
-$HOME/opt/sflex/bin
-
 extrapath=' \
 bin \
 node_modules/.bin \
@@ -100,6 +91,8 @@ HISTFILESIZE=100000
 if [ -x /usr/bin/dircolors ]; then
   test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
   alias ls='ls -A --color=auto --group-directories-first'
+  alias lss='(export LC_ALL="C"; ls -A --color=auto --group-directories-first)'
+  alias lst='(export LC_ALL="C"; ls -Aal --color=auto --group-directories-first)'
 
   alias grep='grep --color=auto'
   alias fgrep='fgrep --color=auto'
