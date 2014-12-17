@@ -20,5 +20,5 @@
 sharename='share-vm'
 sharedir='/home/share/vm'
 
-mount -t vboxfs -o ro $sharename $sharedir
+mount -t vboxsf -o ro $sharename $sharedir
 
