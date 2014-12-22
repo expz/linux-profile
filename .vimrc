@@ -79,6 +79,7 @@ call vundle#begin('~/.vim/bundle/')
 " Plugin 'file:///home/user/.vim/bundle/VimExplorer'
 " Plugin 'file:///home/user/.vim/bundle/vim-flake8'
 " Plugin 'file:///home/user/.vim/bundle/vim-fugitive'
+" Plugin 'file:///home/user/.vim/bundle/vim-markdown'
 " Plugin 'file:///home/user/.vim/bundle/vim-pandoc'
 " Plugin 'file:///home/user/.vim/bundle/vim-pandoc-syntax'
 " Plugin 'file:///home/user/.vim/bundle/vim-vinegar'
@@ -122,8 +123,9 @@ Plugin 'tpope/vim-commentary'  " Light-weight comment out lines
 " Plugin 'mbbill/VimExplorer'  " Powerful file manager
 Plugin 'nvie/vim-flake8'  " Python syntax/style checker
 Plugin 'tpope/vim-fugitive'  " GIT repositories
-Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
-Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
+Plugin 'tpope/vim-markdown'  " Markdown
+" Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
+" Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
 Plugin 'derekwyatt/vim-scala'  " Scala
 Plugin 'mpollmeier/vim-scalaConceal'  " Allow UTF-8 method names for Scala
 Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
@@ -251,13 +253,12 @@ set incsearch
 set showmatch
 
 " }}}
-" Filetype-specific stuff -------------------------------------------------- {{{
-"   > Scala ____________ {{{
-augroup ft_scala
+" Filetype-specific settings ----------------------------------------------- {{{
+"   > Markdown ___________________ {{{
+augroup ft_md
     au!
 
-    au BufRead,BufNewFile *.scala set filetype=scala
-    au! Syntax scala source ~/.vim/bundle/vim-scala/syntax/scala.vim
+    au BufReadPost,BufNewFile *.md set filetype=markdown
 augroup END
 "   }}}
 "   > Python ________________ {{{
@@ -274,13 +275,20 @@ augroup ft_quickfix
     au Filetype qf setlocal colorcolumn=0 nolist nocursorline nowrap
 augroup END
 "   }}}
+"   > Scala ____________ {{{
+augroup ft_scala
+    au!
+
+    au BufRead,BufNewFile *.scala set filetype=scala
+    au! Syntax scala source ~/.vim/bundle/vim-scala/syntax/scala.vim
+augroup END
+"   }}}
 "   > TeX ___________________ {{{
 augroup ft_tex
     au!
 
     au BufRead,BufNewFile *.tex 	set filetype=tex
     au FileType tex setlocal formatoptions=qrjtco
-
 augroup END
 "   }}}
 " }}}
