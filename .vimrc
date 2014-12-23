@@ -9,16 +9,20 @@
 " Author: Jonathan Skowera <jskowera@gmail.com>
 "
 
-" Initialisation -------------------------------------------------------------- {{{
+" Initialisation ----------------------------------------------------------- {{{
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
 
-" Be iMproved, required for Vundle
-set nocompatible
-
-" Required for Vundle
-filetype off
-
-" Set runtime path to include Vundle
-set rtp+=~/.vundle
+" Vundle Preparation
+set nocompatible    " Be vim, not vi
+filetype off        " Reset later (see below)
+set rtp+=~/.vundle  " Runtime path
 
 " BEGIN PLUGINS
 call vundle#begin('~/.vim/bundle/')
@@ -75,6 +79,7 @@ call vundle#begin('~/.vim/bundle/')
 " Plugin 'file:///home/user/.vim/bundle/VimExplorer'
 " Plugin 'file:///home/user/.vim/bundle/vim-flake8'
 " Plugin 'file:///home/user/.vim/bundle/vim-fugitive'
+" Plugin 'file:///home/user/.vim/bundle/vim-markdown'
 " Plugin 'file:///home/user/.vim/bundle/vim-pandoc'
 " Plugin 'file:///home/user/.vim/bundle/vim-pandoc-syntax'
 " Plugin 'file:///home/user/.vim/bundle/vim-vinegar'
@@ -97,10 +102,10 @@ Plugin 'vim-scripts/auctex.vim'  " TeX highlighting
 " Plugin 'yonchu/accelerated-smooth-scroll'  " Smooth scrolling
 " Plugin 'mileszs/ack.vim'  " Use ack from vim
 " Plugin 'itchyny/calendar.vim'  " (Google) Calendar access
-Plugin 'wincent/Command-T'  " Fast file navigation but few features (requires manual compilation step)
+Plugin 'wincent/Command-T'  " Fast file navigation (requires manual compile)
 Plugin 'pthrasher/conqueterm-vim'  " Use shell from vim
 " Plugin 'sjl/gundo.vim'  " Visualize undo tree
-" Plugin 'AndrewRadev/inline_edit.vim'  " Extract javascript from HTML to new buffer
+" Plugin 'AndrewRadev/inline_edit.vim'  " Extract JS from HTML to new buffer
 " Plugin 'LaTeX-Box-Team/LaTeX-Box'  " LaTeX commands
 " Plugin 'scrooloose/nerdtree'  " File navigation
 Plugin 'myusuf3/numbers.vim'  " Better line numbers
@@ -110,7 +115,7 @@ Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
 "" OLD Plugin 'ervandrew/supertab'  " auto-completion using Tab
 Plugin 'scrooloose/syntastic'  " Syntax checking
 " Plugin 'kien/tabman.vim'  " Close tabs without switching to them
-" Plugin 'vim-scripts/taglist.vim'  " Overview of structure of source code files
+" Plugin 'vim-scripts/taglist.vim'  " Overview of structure of source code
 " Plugin 'tomtom/tlib_vim'  " Lib required for SnipMate Python snippets
 " Plugin 'MarcWeber/vim-addon-mw-utils'  " Utils required for SnipMate
 " Plugin 'sophacles/vim-bundle-mako'  " Python template library
@@ -118,8 +123,9 @@ Plugin 'tpope/vim-commentary'  " Light-weight comment out lines
 " Plugin 'mbbill/VimExplorer'  " Powerful file manager
 Plugin 'nvie/vim-flake8'  " Python syntax/style checker
 Plugin 'tpope/vim-fugitive'  " GIT repositories
-Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
-Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
+Plugin 'tpope/vim-markdown'  " Markdown
+" Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
+" Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
 Plugin 'derekwyatt/vim-scala'  " Scala
 Plugin 'mpollmeier/vim-scalaConceal'  " Allow UTF-8 method names for Scala
 Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
@@ -133,21 +139,9 @@ Plugin 'Valloric/YouCompleteMe'  " Auto-completion and omnibox
 call vundle#end()
 " END PLUGINS
 
-" Required for Vundle
-filetype plugin indent on
-
-"
-" Brief help
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
-"
-" see :h vundle for more details or wiki for FAQ
-"
 
 " }}}
-" Colors and Fonts ------------------------------------------------------------ {{{
+" Colors and Fonts --------------------------------------------------------- {{{
 
 syntax on
 set background=dark
@@ -158,56 +152,72 @@ set background=dark
 set guifont=DejaVu\ Sans\ Mono\ 10
 
 " }}}
-" General Options ------------------------------------------------------------- {{{
+" General Options ---------------------------------------------------------- {{{
 
-set shortmess=at  " Ensure we don't get hit-enter prompts
-set encoding=utf-8
-set backspace=indent,eol,start
-set history=10000
-set undofile
-set undoreload=10000
-set nolist
 set shell=/bin/bash
-set autoread
-set display=uhex
+
 set nofsync
-set shiftround
-set notimeout
-set nottimeout
 set autowrite
-set foldlevelstart=1
-set formatprg=fmt\ -w80
-set clipboard=unnamed
+
+set nofoldenable
 set number
 
+set backspace=indent,eol,start
 set completeopt=menuone,longest,preview
 
+"set autoread
+"set shiftround
+"set notimeout
+"set nottimeout
+
+" }}}
+" Formatting --------------------------------------------------------------- {{{
+
+set encoding=utf-8
+set wrap              " only wrap visually
+set linebreak         " only wrap at characters in the breakat option
+set nolist            " list disables linebreak
+set formatoptions+=l  " prevent auto reformat when typing in existing lines
+set formatprg=fmt\ -w80
+
+" Hex dumps activated by calling vim -b or by :%!xxd
+"   convert hex back to binary using :%!xxd -r
+set display=uhex
 
 " 	> Tabs __________________ {{{
+
+" Filetype specific indentation will override autoindent when necessary
+set autoindent
+" Use filetype specific indentation
+filetype plugin indent on
 
 set smarttab
 set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 set expandtab
-set wrap
-set textwidth=0
 
 " set formatoptions=qrjtco
 
 " 	}}}
 
 " }}}
-" Backups --------------------------------------------------------------------- {{{
+" Backups / Undo ----------------------------------------------------------- {{{
 
 set noswapfile
-set undodir=~/temp/vim/undo/      " undo files
-set backupdir=~/temp/vim/backup/  " backups
-set directory=~/temp/vim/swap/    " swap files
-set backup                        " enabled
+set undodir=~/temp/vim/undo/
+set backupdir=~/temp/vim/backup/
+set directory=~/temp/vim/swap/
+set backup
+set history=10000
+set undofile
+set undoreload=10000
+set clipboard=unnamed
 
 " }}}
-" Status line ----------------------------------------------------------------- {{{
+" Status line -------------------------------------------------------------- {{{
+
+set shortmess=a
 
 if has('statusline')
     set statusline=%<%f    " Path.
@@ -218,10 +228,6 @@ if has('statusline')
     set statusline+=%{fugitive#statusline()}   "  Fugitive GIT status
 
     set statusline+=\    " Space.
-
-    "set statusline+=%#redbar#                " Highlight the following as a warning.
-    "set statusline+=%{SyntasticStatuslineFlag()} " Syntastic errors.
-    "set statusline+=%*                           " Reset highlighting.
 
     set statusline+=%=   " Right align.
 
@@ -239,11 +245,7 @@ if has('statusline')
 endif
 
 " }}}
-" Searching and movement ------------------------------------------------------ {{{
-
-" Use sane regexes.
-" nnoremap / /\v
-" vnoremap / /\v
+" Searching and movement --------------------------------------------------- {{{
 
 set ignorecase
 set smartcase
@@ -251,29 +253,12 @@ set incsearch
 set showmatch
 
 " }}}
-" Shortcuts ----------------------------------------------------- {{{
-
-" }}}
-" Filetype-specific stuff ----------------------------------------------------- {{{
-"   > Scala ____________ {{{
-augroup ft_scala
+" Filetype-specific settings ----------------------------------------------- {{{
+"   > Markdown ___________________ {{{
+augroup ft_md
     au!
 
-    au BufRead,BufNewFile *.scala set filetype=scala
-    au! Syntax scala source ~/.vim/bundle/vim-scala/syntax/scala.vim
-augroup END
-
-"   }}}
-"   > Javascript ____________ {{{
-augroup ft_javascript
-    au!
-
-augroup END
-"   }}}
-"   > Pandoc  _______________ {{{
-augroup ft_pandoc
-    au!
-
+    au BufReadPost,BufNewFile *.md set filetype=markdown
 augroup END
 "   }}}
 "   > Python ________________ {{{
@@ -290,44 +275,50 @@ augroup ft_quickfix
     au Filetype qf setlocal colorcolumn=0 nolist nocursorline nowrap
 augroup END
 "   }}}
+"   > Scala ____________ {{{
+augroup ft_scala
+    au!
+
+    au BufRead,BufNewFile *.scala set filetype=scala
+    au! Syntax scala source ~/.vim/bundle/vim-scala/syntax/scala.vim
+augroup END
+"   }}}
 "   > TeX ___________________ {{{
 augroup ft_tex
     au!
 
     au BufRead,BufNewFile *.tex 	set filetype=tex
     au FileType tex setlocal formatoptions=qrjtco
-
 augroup END
 "   }}}
 " }}}
-" Plugin configuration -------------------------------------------------------- {{{
-"   > LaTeX-Box _____________ {{{
-    " Folding is incredibly slow in latexbox, so we don't use it.
-    let g:LatexBox_Folding = 0
-    let g:LatexBox_fold_preamble = 0
-    let g:LatexBox_fold_envs = 0
-"   }}}
-"   > Command-T _____________ {{{
-
-"   }}}
-"   > ConqueTerm ____________ {{{
-
-    " Bugfix for ConqueTerm, doesn't check for this variable being
-    " defined.
-    let g:ConqueTerm_SessionSupport = 0
-
-"   }}}
-"   > PyFlakes ______________ {{{
-
-"   }}}
+" Plugin configuration ----------------------------------------------------- {{{
 "   > Commentary ____________ {{{
 
     nmap <c-c> <Plug>CommentaryLine
     vmap <c-c> <Plug>Commentary
 
 "   }}}
+"   > ConqueTerm ____________ {{{
+
+    " Bugfix for ConqueTerm
+    let g:ConqueTerm_SessionSupport = 0
+
+"   }}}
+"   > LaTeX-Box _____________ {{{
+
+    let g:LatexBox_Folding = 0
+    let g:LatexBox_fold_preamble = 0
+    let g:LatexBox_fold_envs = 0
+
+"   }}}
+"   > vim-markdown ______________ {{{
+
+    let g:vim_markdown_folding_disabled=1
+
+"   }}}
 " }}}
-" Remappings ------------------------------------------------------------------ {{{
+" Remappings --------------------------------------------------------------- {{{
 "   > General _______________ {{{
     
     " Use comma instead of \ for <Leader>
@@ -339,9 +330,8 @@ augroup END
     nmap <silent> <c-h> :wincmd h<CR>
     nmap <silent> <c-l> :wincmd l<CR>
 
-    " Making it so that scrolling with selections doen't screw up; we can find the
-    " previous selection again with 'gv'.
-
+    " Scroll with selection
+    " Find the previous selection again with 'gv'
     xnoremap <ScrollWheelUp> <esc><ScrollWheelUp>
     xnoremap <ScrollWheelDown> <esc><ScrollWheelDown>
 
@@ -357,22 +347,10 @@ augroup END
 
 "   }}}
 " }}}
-" GUI configs ----------------------------------------------------------------- {{{
+" GUI config --------------------------------------------------------------- {{{
 
     " Different cursors for different modes.
     set guicursor=n-c:block-Cursor-blinkon0
     set guicursor+=v:block-vCursor-blinkon0
-
-" }}}
-" Utility Functions ----------------------------------------------------------- {{{
-
-
-" }}}
-" Commands -------------------------------------------------------------------- {{{
-
-
-" }}}
-" Wrapup ---------------------------------------------------------------------- {{{
-
 
 " }}}
