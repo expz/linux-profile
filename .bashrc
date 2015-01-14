@@ -57,11 +57,15 @@ cmdfu() {
   curl --silent \
     "http://$searchurl/$searchstr/$searchstr64/plaintext" \
     | sed "s/\(^#.*\)/\x1b[32m\1\x1b[0m/g" \
-    | less -R
+    | less
 }
 
 #################################################
 # Shell Options
+
+# Stop less from clearing screen after quitting
+# WARNING: This breaks color coding
+# export LESS=X
 
 # Set prompt
 #  \e[0m anywhere => Makes the newline not work
