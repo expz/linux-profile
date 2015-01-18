@@ -50,9 +50,22 @@ export JAVA_HOME=/usr/lib/jvm/oracle-jdk1.7.0_67
 #################################################
 # Nothing below executed for non-interactive prompts!!!
 
+cmdfu() {
+  searchstr=$(echo -n "$@" | sed 's/ /-/g')
+  searchstr64=$(echo -n "$@" | base64)
+  searchurl="www.commandlinefu.com/commands/matching"
+  curl --silent \
+    "http://$searchurl/$searchstr/$searchstr64/plaintext" \
+    | sed "s/\(^#.*\)/\x1b[32m\1\x1b[0m/g" \
+    | less
+}
 
 #################################################
 # Shell Options
+
+# Stop less from clearing screen after quitting
+# WARNING: This breaks color coding
+# export LESS=X
 
 # Set prompt
 #  \e[0m anywhere => Makes the newline not work
