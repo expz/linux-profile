@@ -56,8 +56,8 @@ cmdfu() {
   searchurl="www.commandlinefu.com/commands/matching"
   curl --silent \
     "http://$searchurl/$searchstr/$searchstr64/plaintext" \
-    | sed "s/\(^#.*\)/\x1b[32m\1\x1b[0m/g" \
-    | less
+    | sed -u 's/^\(#.*\)$/\o033[32;1m\1\o033[0m/g' \
+    | less -r -X
 }
 
 #################################################
