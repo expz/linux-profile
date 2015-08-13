@@ -27,11 +27,15 @@ echo "deb http://download.mono-project.com/repo/debian wheezy main" > /etc/apt/s
 #refresh package list
 apt-get update
 
-#install newer mono & friends
-apt-get install mono-devel
+#install newer mono
+#apt-get install mono-devel
+
+#install clang support
+apt-get install llvm clang cmake
 
 su user <<EOF
-cd ~/.vim/bundles/YouCompleteMe
-./install.sh --clang-completer --omnisharp-completer
+cd ~/.vim/bundle/YouCompleteMe
+#./install.sh --clang-completer --omnisharp-completer
+./install.sh --clang-completer
 EOF
 
