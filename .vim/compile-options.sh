@@ -4,7 +4,15 @@
 #
 # Install prerequisites
 #
-#   sudo apt-get install lua5.1 liblua5.1-0 liblua5.1-0-dev perl libperl5.18 libperl-dev python2.7 libpython2.7 libpython2.7-dev python3.4 libpython3.4 libpython3.4-dev ruby2.1 libruby2.1 ruby2.1-dev
+#   sudo apt-get install lua5.2 liblua5.2-0 liblua5.2-dev perl libperl-dev python libpython-all-dev python3 libpython3-all-dev ruby ruby-dev libruby
+#
+# Worked for me with versions:
+#
+#   lua5.1 liblua5.1-0 liblua5.1-0-dev \
+#   perl libperl5.18 libperl-dev \
+#   python2.7 libpython2.7 libpython2.7-dev \
+#   python3.4 libpython3.4 libpython3.4-dev \
+#   ruby2.1 libruby2.1 ruby2.1-dev
 #
 # Install vim source
 #
@@ -38,3 +46,4 @@
   --enable-rubyinterp \
   --enable-multibyte \
   --disable-xterm_clipboard
+
