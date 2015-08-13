@@ -13,12 +13,7 @@
 
 extrapath='
 bin
-node_modules/.bin
-src/gocode/bin
-opt/android/studio/bin
-opt/android-studio/sdk/tools
-opt/sbison/bin
-opt/sflex/bin
+opt/packer/bin
 '
 
 for dn in $extrapath; do
@@ -28,8 +23,6 @@ for dn in $extrapath; do
 done
 
 extrasource='
-opt/google-cloud-sdk/path.bash.inc
-opt/google-cloud-sdk/completion.bash.inc
 '
 
 for fn in $extrasource; do
