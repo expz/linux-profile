@@ -31,9 +31,9 @@ for fn in $extrasource; do
   fi
 done
 
-export GOPATH=$HOME/src/gocode
+#export GOPATH=$HOME/src/gocode
 
-export JAVA_HOME=/usr/lib/jvm/oracle-jdk1.7.0_67
+#export JAVA_HOME=/usr/lib/jvm/oracle-jdk1.7.0_67
 
 #################################################
 
@@ -112,6 +112,9 @@ alias ii='sudo apt-get install'
 
 ##################################################
 # XWindows Options
+
+# Remap caps lock to escape key
+setxkbmap -option caps:escape
 
 # Remap CAPS_LOCK to SUPER (Mac/Windows Key)
 # WARNING: This changes the XWindows key mapping in all applications
