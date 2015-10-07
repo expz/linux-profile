@@ -64,6 +64,10 @@ cmdfu() {
 #  \e[0m anywhere => Makes the newline not work
 PS1="\u@\h:\w > "
 
+# Set vim as default command line editor
+# Edit a command line by pressing CTRL+x CTRL+e
+VISUAL=/usr/bin/vim
+
 # Make the * match hidden files
 shopt -s dotglob
 

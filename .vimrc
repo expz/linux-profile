@@ -1,9 +1,9 @@
 " Jonathan's .vimrc.
 "
 " NOTE: Don't forget to create the directories
-"   ~/temp/vim/backup
-"   ~/temp/vim/swap
-"   ~/temp/vim/undo
+"   ~/tmp/vim/backup
+"   ~/tmp/vim/swap
+"   ~/tmp/vim/undo
 " and change their permissions to 700.
 "
 " Author: Jonathan Skowera <jskowera@gmail.com>
@@ -102,14 +102,14 @@ Plugin 'vim-scripts/auctex.vim'  " TeX highlighting
 " Plugin 'yonchu/accelerated-smooth-scroll'  " Smooth scrolling
 " Plugin 'mileszs/ack.vim'  " Use ack from vim
 " Plugin 'itchyny/calendar.vim'  " (Google) Calendar access
-Plugin 'wincent/Command-T'  " Fast file navigation (requires manual compile)
+" Plugin 'wincent/Command-T'  " Fast file navigation (requires manual compile)
 Plugin 'pthrasher/conqueterm-vim'  " Use shell from vim
 " Plugin 'sjl/gundo.vim'  " Visualize undo tree
 " Plugin 'AndrewRadev/inline_edit.vim'  " Extract JS from HTML to new buffer
 " Plugin 'LaTeX-Box-Team/LaTeX-Box'  " LaTeX commands
-" Plugin 'scrooloose/nerdtree'  " File navigation
+Plugin 'scrooloose/nerdtree'  " File navigation
 Plugin 'myusuf3/numbers.vim'  " Better line numbers
-" Plugin 'vim-scripts/pydoc.vim'  " Search Python documentation
+Plugin 'vim-scripts/pydoc.vim'  " Search Python documentation
 " Plugin 'python-rope/ropevim'  " rope Python refactoring library
 Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
 "" OLD Plugin 'ervandrew/supertab'  " auto-completion using Tab
@@ -134,7 +134,7 @@ Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
 " Plugin 'honza/vim-snippets'  " Collection of snippets
 " Plugin 'vimoutliner/vimoutliner'  " Write outlines, to-do list, etc
 " Plugin 'vimwiki/vimwiki'  " Wiki editor
-Plugin 'Valloric/YouCompleteMe'  " Auto-completion and omnibox
+" Plugin 'Valloric/YouCompleteMe'  " Auto-completion and omnibox
 
 call vundle#end()
 " END PLUGINS
@@ -205,9 +205,9 @@ set expandtab
 " Backups / Undo ----------------------------------------------------------- {{{
 
 set noswapfile
-set undodir=~/temp/vim/undo/
-set backupdir=~/temp/vim/backup/
-set directory=~/temp/vim/swap/
+set undodir=~/tmp/vim/undo/
+set backupdir=~/tmp/vim/backup/
+set directory=~/tmp/vim/swap/
 set backup
 set history=10000
 set undofile
@@ -264,6 +264,9 @@ augroup END
 "   > Python ________________ {{{
 augroup ft_python
     au!
+
+    au FileType python setlocal tabstop=8 expandtab shiftwidth=4 softtabstop=4
+    au FileType python filetype indent on
 
     au FileType python setlocal omnifunc=pythoncomplete#Complete
 augroup END
@@ -335,13 +338,16 @@ augroup END
     xnoremap <ScrollWheelUp> <esc><ScrollWheelUp>
     xnoremap <ScrollWheelDown> <esc><ScrollWheelDown>
 
-    " Faster way to get into command mode.
-    noremap ; :
-
     " Shortcuts for saving
     " nnoremap <S-Space> :wa<cr>
     nnoremap <Space> :w<cr>
 
+    " ConqueTerm terminal shortcuts
+    map <leader>nt :ConqueTerm /bin/bash<cr>
+    map <leader>vt :ConqueTermVSplit /bin/bash<cr>
+    
+    " NERDTree shortcuts
+    map <leader>ls :NERDTreeToggle<CR>
 "   }}}
 "   > Leaders _______________ {{{
 
