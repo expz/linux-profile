@@ -1,0 +1,12 @@
+#! /bin/sh
+
+kvtmlhead='<\!DOCTYPE kvtml SYSTEM \"kvoctrain.dtd\">';
+xmlhead='<\?xml-stylesheet type=\"text\/xsl\" href=\"kvtml.xsl\"\?>';
+
+if [ $1 = "do" ]; then
+	sed -i "s/$kvtmlhead/$xmlhead/g" `ls -d *.kvtml`
+elif [ $1 = "undo" ]; then
+	sed -i "s/$xmlhead/$kvtmlhead/g" `ls -d *.kvtml`
+else
+	echo USAGE:\n kvtml2xml do \t= \tChange KVTML headers to XML headers.\n kvtml2xml undo \t= \tChange XML headers to KVTML headers.
+fi
