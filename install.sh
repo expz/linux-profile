@@ -70,11 +70,10 @@ esac
 if "$INSTALL"; then
   # create bin and tmp directories
   mkdir -p ~/bin
-  mkdir -p ~/tmp
+  mkdir -p ~/tmp/vim/{backup,swap,undo}
 
-  # copy bin and tmp without overwriting
+  # copy bin without overwriting
   cp -nR "$ROOT_DIR"/bin/* ~/bin/
-  cp -nR "$ROOT_DIR"/tmp/* ~/tmp/
 
   # copy vim plugins and settings
   safe_copy '.vim' "$HOME_DIR"
