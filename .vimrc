@@ -333,6 +333,12 @@ augroup END
     nmap <silent> <c-h> :wincmd h<CR>
     nmap <silent> <c-l> :wincmd l<CR>
 
+    " Copy and paste to Linux (X11) clipboard
+    " Must be done this way for compatibility with Centos/RHEL/Fedora
+    "   i.e., when vim is not compiled with +xterm_clipboard
+    vmap <c-y> :!xclip -f -sel clip<cr>
+    map <c-p> :-1r !xclip -o -sel clip<cr>
+
     " Scroll with selection
     " Find the previous selection again with 'gv'
     xnoremap <ScrollWheelUp> <esc><ScrollWheelUp>
