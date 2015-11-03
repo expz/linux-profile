@@ -71,6 +71,7 @@ if "$INSTALL"; then
   # create bin and tmp directories
   mkdir -p ~/bin
   mkdir -p ~/tmp/vim/{backup,swap,undo}
+  chmod -R 700 ~/tmp/vim
 
   # copy bin without overwriting
   cp -nR "$ROOT_DIR"/bin/* ~/bin/
