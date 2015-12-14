@@ -1,1 +1,15 @@
-chcon -R system_u:object_r:svirt_sandbox_file_t:s0 .
+#!/bin/sh
+
+if [ -n "$1" ] && [ "--help" != "$1" ] && [ "-h" != "$1" ]; then
+  chcon -R system_u:object_r:svirt_sandbox_file_t:s0 "$1"
+else
+
+  cat << EOF
+USAGE: dockperm [DIRECTORY]
+
+Recursively change the selinux permissions of the given directory
+to enable docker access.
+EOF
+
+fi
+
