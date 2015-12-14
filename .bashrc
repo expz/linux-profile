@@ -45,6 +45,7 @@ export VAGRANT_DEFAULT_PROVIDER=virtualbox
 #################################################
 # Nothing below executed for non-interactive prompts!!!
 
+# search online cmdfu shell command repository
 cmdfu() {
   searchstr=$(echo -n "$@" | sed 's/ /-/g')
   searchstr64=$(echo -n "$@" | base64)
@@ -53,6 +54,26 @@ cmdfu() {
     "http://$searchurl/$searchstr/$searchstr64/plaintext" \
     | sed -u 's/^\(#.*\)$/\o033[32;1m\1\o033[0m/g' \
     | less -r -X
+}
+
+# sync $1 to $2 using ssh and compression preserving file attributes
+ssync() {
+  rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --progress "$1" "$2"
+}
+
+# get the absolute path of a file or directory
+absolute_path() {
+  if [ -d "$@" ]; then
+    echo $(cd "$@" && pwd -P)
+  else
+    echo $(cd $(dirname "$@") && pwd -P)/$(basename "$@")
+  fi
+}
+
+# escape a string so it will be treated as a literal in a regex
+# http://stackoverflow.com/a/2705678/120999
+unregex() {
+  sed -e 's/[]\/()$*.^|[]/\\&/g' <<< "$1"
 }
 
 #################################################
