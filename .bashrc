@@ -35,6 +35,8 @@ done
 
 #export JAVA_HOME=/usr/lib/jvm/oracle-jdk1.7.0_67
 
+export VAGRANT_DEFAULT_PROVIDER=virtualbox
+
 #################################################
 
 # If not running interactively, don't do anything else

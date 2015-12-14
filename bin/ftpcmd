@@ -1,0 +1,343 @@
+#!/bin/sh
+#
+# ftpfiles()
+#   Send website files to web server by ftp over SSL3
+#   Meant to be ultra-portable
+#
+#
+# REQUIREMENTS:
+#   * A version of the 'curl' program supporting SSL3 (otherwise modify script)
+#   * If you need to apply a transformation to the files before transferring:
+#       write permissions for a temp directory (see below to set it)
+#       or permission to create the temp directory
+#   * If you like to end your filenames in newlines, you're out of luck. The
+#       use of $( ... ) strips all trailing newlines.
+#
+# Intented to be resistant against evil filenames, but this is untested.
+#
+# The encryption mechanism for ftp.conf uses aes256. This is only 
+# secure if aes256 is secure against 'known-plaintext attacks',
+# because the ftp.conf uses a predictable format.
+
+usage() {
+cat <<EOF
+Usage: ftpcmd [opts] [file list|glob list]
+ 
+The ftpcmd program searches in the current directory for a file named ftp.conf. If it is not found, it recursively searches parent directories until it finds such a file. The ftp.conf is then decrypted using openssl aes256. The default key is ~/.ssh/id_rsa, but a different key can be supplied on the command line.
+
+An example configuration file:
+
+  [server_label]
+  host=x.x.x.x
+  username=...
+  password=...
+  remote_eof=win
+  remote_dir=/path/to/remote/project/root
+
+* The server label is arbitrary, but must begin with a-z, A-Z or _
+* Multiple server configurations may be placed in a single file
+* remote_eof may be 'win' or 'normal' or 'old_mac'
+* remote_dir should begin with a / . The / directory translates to the default login directory for the given user configured on the ftp server
+
+Converting Local to Remote Paths
+
+The directory which contains the found ftp.conf file is used as the base directory for relativizing local paths. The 'remote_dir' property in ftp.conf is used as the base directory for relativizing remote paths. 
+
+For example, if 'ftpcmd script.js' is invoked from the working directory
+
+  /home/user/src/myproject/www/js
+
+then it will search in the 'bootstrap' folder for a file named ftp.conf. Assume there is no such file, but that there is an ftp.conf located at
+
+  /home/user/src/myproject/www/ftp.conf
+
+which specifies
+
+  remote_dir=/inetpub/wwwroot/dev/myproject
+
+In this case, the file
+
+  /home/user/src/myproject/www/js/script.js
+
+would be transferred to
+
+  [FTP_ROOT_DIR]/inetpub/wwwroot/dev/myproject/js/script.js
+
+Command Line Options
+
+  -c
+    Use the program 'curl' to transfer the files.
+
+  -f
+    Use the program 'ftp' to transfer the files. (Default)
+
+  -g
+    Expand any fileglobs, e.g., '*.txt', in the file list. Default is
+    not to expand. Please note that the shell usually expands unquoted
+    globs before passing them as arguments.
+
+  -h
+    Print this message and exit.
+
+  -k [PRIVATE_KEY_FILE]
+    Specifies to use PRIVATE_KEY_FILE to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
+
+  -n
+    Do not use a key file (ftp.conf is plaintext).
+EOF
+}
+
+# encode string for url (very portable implementation)
+urlencode() {
+  echo $replace_value \
+    | sed \
+      -e 's:%:%25:g' \
+      -e 's: :%20:g' \
+      -e 's:<:%3C:g' \
+      -e 's:>:%3E:g' \
+      -e 's:#:%23:g' \
+      -e 's:{:%7B:g' \
+      -e 's:}:%7D:g' \
+      -e 's:|:%7C:g' \
+      -e 's:\\:%5C:g' \
+      -e 's:\^:%5E:g' \
+      -e 's:~:%7E:g' \
+      -e 's:\[:%5B:g' \
+      -e 's:\]:%5D:g' \
+      -e 's:`:%60:g' \
+      -e 's:;:%3B:g' \
+      -e 's:/:%2F:g' \
+      -e 's:?:%3F:g' \
+      -e 's^:^%3A^g' \
+      -e 's:@:%40:g' \
+      -e 's:=:%3D:g' \
+      -e 's:&:%26:g' \
+      -e 's:\$:%24:g' \
+      -e 's:\!:%21:g' \
+      -e 's:\*:%2A:g'
+}
+
+# $1 text of configuration file (string)
+# $2 configuration label
+readconf_conn() {
+  IN_CONFIG=false
+  echo "$1" | while read line; do
+    if LC_ALL=C echo "$line" | grep -q "^\[$2\]"; then
+      # in the request config specified by arg 5
+      IN_CONFIG=true
+    elif "$IN_CONFIG"; then
+      if LC_ALL=C echo "$line" | grep -q "^\["; then
+        # now in a different config
+        IN_CONFIG=false
+      else
+        # in the requested config
+        if LC_ALL=C echo "$line" | grep -iq "^remote_dir[[:space:]]*="; then
+          $REMOTE_DIR=$(echo "$line" | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*//g')
+        elif LC_ALL=C echo "$line" | grep -iq "^username[[:space:]]*="; then
+          $USERNAME=$(echo "$line" | cut -d '=' -f 2)
+        elif LC_ALL=C echo "$line" | grep -iq "^password[[:space:]]*="; then
+          $PASSWORD=$(echo "$line" | cut -d '=' -f 2)
+        elif LC_ALL=C echo "$line" | grep -iq "^host[[:space:]]*="; then
+          $HOST=$(echo "$line" | cut -d '=' -f 2)
+        fi
+      fi
+    fi
+    echo "$(urlencode '$USERNAME'):$(urlencode '$PASSWORD')@$HOST:$(urlencode '$REMOTE_DIR')"
+  done | tail -1
+}
+
+readconf_remoteos() {
+  IN_CONFIG=false
+  echo "$1" | while read line; do
+    if LC_ALL=C echo "$line" | grep -q "^\[$2\]"; then
+      # in the request config specified by arg 5
+      IN_CONFIG=true
+    elif "$IN_CONFIG"; then
+      if LC_ALL=C echo "$line" | grep -q "^\["; then
+        # now in a different config
+        IN_CONFIG=false
+      else
+        # in the requested config
+        if LC_ALL=C echo "$line" | grep -iq "^remote_os[[:space:]]*="; then
+          $REMOTE_OS=$(echo "$line" | cut -d '=' -f 2)
+        fi
+      fi
+    fi
+    echo "$REMOTE_OS"
+  done | tail -1
+}
+
+encrypt_openssl() {
+  openssl enc -e -aes-256-cbc -in "$1" -out -;
+}
+
+decrypt_openssl() {
+  openssl enc -d -aes-256-cbc -d -in "$1" -out -;
+}
+
+encrypt_gpg() {
+  cat "$1" \
+    | GPG_AGENT_INFO="" \
+      gpg --cipher-algo aes256 -e -o- - 2>/dev/null;
+}
+
+decrypt_gpg() {
+  cat "$1" \
+    | GPG_AGENT_INFO="" \
+      gpg --cipher-algo aes256 -d -o- - 2>/dev/null;
+} 
+
+dircount() { echo "$1" | tr /\\n \\n/ | wc -l ; }
+matchstr() { case "$1" in "$2") return 0 ;; *) return 1 ;; esac ; }
+
+unregex() {
+  sed -e 's/[]\/()$*.^|[]/\\&/g' <<< "$1"
+}
+
+absolute_path() {
+  if [ -d "$@" ]; then
+    echo $(cd "$@" && pwd -P)
+  else
+    echo $(cd $(dirname "$@") && pwd -P)/$(basename "$@")
+  fi
+}
+
+NEWLINE="
+
+"
+  
+SCRIPT_PATH=$(pwd -P)
+
+# Default options
+GLOBBING=false
+CONFIG_LABEL='default'
+KEY_FILE='ftp.conf'
+
+if [ "$#" = "0" ]; then
+  usage
+  exit 1
+fi
+
+# Clear these variables
+unset OPTIND nextopt
+while getopts ':cfghk::' nextopt; do
+  case "$nextopt" in
+    c)
+      SEND_USING=curl
+      ;;
+    f)
+      SEND_USING=ftp
+      ;;
+    g)
+      GLOBBING=1
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    k)
+      KEY_FILE="$1"
+      ;;
+    n)
+      KEY_FILE=
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+# shift out the switches and read the arguments (files to send)
+shift $(( OPTIND - 1 ))
+
+# Expand globs if necessary
+LOCAL_FILES=
+if "$GLOBBING"; then
+  for fnglob in "$@"; do
+    for fn in "$(ls -Q $fnglob)"; do
+      LOCAL_FILES="$LOCAL_FILES $fn"
+    done
+  done
+else
+  for fn in "$@"; do
+    LOCAL_FILES="$LOCAL_FILES $(ls -Q "$fn")"
+  done
+fi
+
+REL_DIR_REGEX="s/^$(unregex $ROOT_DIR)\/\(.*\)$/\1/g"
+
+find_config() {
+  cd "$1"
+  PREV_DIR=
+  CURR_DIR="$(pwd -P)"
+  while [ "$CURR_DIR" != "$PREV_DIR" ]; do
+    if [ -e 'ftp.conf' ]; then
+      echo "$(pwd -P)/ftp.conf"
+      return
+    fi
+    cd ..
+    PREV_DIR="$CURR_DIR"
+    CURR_DIR="$(pwd -P)"
+  done
+ }
+
+# find configuration file
+CONF_FILE="$(find_config "$ROOT_DIR")"
+
+# read encrypted configuration file
+conf_text=$(
+if [ "$GPG" ]; then
+  decrypt_gpg "$CONF_FILE"
+else
+  decrypt_openssl "$CONF_FILE"
+fi)
+# get connection string
+conn=$(readconf_conn "$conf_text" "$CONFIG_LABEL")
+# get remote_os type
+remote_os=$(readconf_remoteos "$conf_text" "$CONFIG_LABEL")
+
+case "$SEND_USING" in
+  curl)
+    # send the files using curl with SSL3
+    for fn in $REL_PATHS; do
+      curl -3 -v  --disable-epsv --ftp-skip-pasv-ip --ftp-ssl \
+        -T "$local_dir/$fn" \
+        "$conn/$fn"
+    done
+    ;;
+  *)
+    # send the files using ftp
+    TRANS_CMD=''
+    TRANS_CMD=`
+    find "$@" -type f | while read fn
+    do
+      fn_absolute_path=$(absolute_path "$fn")
+      fn_relative_to_root=$(sed -e "$REL_DIR_REGEX" <<< "$fn_absolute_path")
+      mkdir -p "$tmpdir/${fn_relative_to_root%/*}"
+      cp "$fn" "$tmpdir/$fn_relative_to_root"
+      nix2win_in_place "$tmpdir/$fn_relative_to_root"
+      TRANS_CMD="${TRANS_CMD}put \"$tmpdir/$fn_relative_to_root\" \"$TARGET_DIR/$fn_relative_to_root\"<NEWLINE>"
+      echo "$TRANS_CMD"
+    done | tail -n 1 | sed 's/<NEWLINE>/\n/g'
+    `
+
+    ftp -inv "$HOST" << EOF
+
+user "$USER" "$PASS"
+
+cd $TARGET_DIR
+
+binary
+
+$TRANS_CMD
+
+bye
+
+EOF
+  ;;
+esac
+
+# only deletes directory if it is empty
+rm -r "$tmpdir"
+#--cacert /etc/ssl/certs/cert.pem
