@@ -76,6 +76,23 @@ unregex() {
   sed -e 's/[]\/()$*.^|[]/\\&/g' <<< "$1"
 }
 
+# make a password with 20 alphanumeric characters excluding A, B, C, x, y and z:
+#   mkpassa 20 'ABCxyz'
+mkpassa() {
+  base64 /dev/urandom | tr -d "/+$2" | dd bs="$1" count=1 status=none | xargs echo;
+}
+
+# make a password with 20 characters 0-9, a-f:
+#   mkpassb 20
+mkpassb() {
+  xxd -p /dev/urandom | dd bs="$1" count=1 status=none | xargs echo;
+}
+
+# make a password with 20 alphanumeric characters excluding easily confusable ones:
+mkpassc() {
+  base64 /dev/urandom | tr -d "/+1lIo0Oq" | dd bs="$1" count=1 status=none | xargs echo;
+}
+
 #################################################
 # Shell Options
 
