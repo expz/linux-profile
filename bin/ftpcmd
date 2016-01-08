@@ -92,6 +92,7 @@ Command Line Options
   -u
     Use the program 'curl' to transfer the files.
 
+NOTE: Does not transfer (ignores) files named 'ftp.conf'.
 EOF
 }
 
@@ -341,71 +342,72 @@ fi
 
 find "$@" -type f | while read fn
 do
-  fn_absolute=$(absolute_path "$fn")
+  if [ "$(basename $fn)" != "ftp.conf" ]; then
+    fn_absolute=$(absolute_path "$fn")
 
-  # find configuration file
-  CONF_FILENAME="$(find_config "$fn_absolute")"
+    # find configuration file
+    CONF_FILENAME="$(find_config "$fn_absolute")"
 
-  # read encrypted configuration file
-  if [ "$KEY_FILE" = "" ]; then
-    conf_text="$(cat $CONF_FILENAME)"
-  else
-    conf_text=$(
-    if [ "$GPG" ]; then
-      decrypt_gpg "$CONF_FILENAME"
+    # read encrypted configuration file
+    if [ "$KEY_FILE" = "" ]; then
+      conf_text="$(cat $CONF_FILENAME)"
     else
-      decrypt_openssl "$CONF_FILENAME"
-    fi)
-  fi
+      conf_text=$(
+      if [ "$GPG" ]; then
+        decrypt_gpg "$CONF_FILENAME"
+      else
+        decrypt_openssl "$CONF_FILENAME"
+      fi)
+    fi
 
-  # compute root dir for transferring this particular file
-  FILE_ROOT_DIR="$(dirname $CONF_FILENAME)"
-  REMOTE_ROOT_DIR="$(readconf "$conf_text" "$CONFIG_LABEL" 'remote_dir')"
+    # compute root dir for transferring this particular file
+    FILE_ROOT_DIR="$(dirname $CONF_FILENAME)"
+    REMOTE_ROOT_DIR="$(readconf "$conf_text" "$CONFIG_LABEL" 'remote_dir')"
 
-  # compute path relative to folder containing configuration file
-  REL_DIR_REGEX="s/^$(unregex $FILE_ROOT_DIR)\/\(.*\)$/\1/g"
-  fn_relative=$(sed -e "$REL_DIR_REGEX" <<< "$fn_absolute")
-  mkdir -p "$tmpdir/$(dirname $fn_relative)"
+    # compute path relative to folder containing configuration file
+    REL_DIR_REGEX="s/^$(unregex $FILE_ROOT_DIR)\/\(.*\)$/\1/g"
+    fn_relative=$(sed -e "$REL_DIR_REGEX" <<< "$fn_absolute")
+    mkdir -p "$tmpdir/$(dirname $fn_relative)"
 
-  # get preprocessor
-  PREPROCESSOR=$(readconf "$conf_text" "$CONFIG_LABEL" 'preprocessor')
-  if [ "$PREPROCESSOR" = "" ]; then
-    PREPROCESSOR='cat'
-  else
-    case "$PREPROCESSOR" in
-    /*)
-      ;;
-    *)
-      PREPROCESSOR="$FILE_ROOT_DIR"/"$PREPROCESSOR"
-    esac
-  fi
-  # preprocess
-  cat "$fn" | "$PREPROCESSOR" > "$tmpdir/$fn_relative"
+    # get preprocessor
+    PREPROCESSOR=$(readconf "$conf_text" "$CONFIG_LABEL" 'preprocessor')
+    if [ "$PREPROCESSOR" = "" ]; then
+      PREPROCESSOR='cat'
+    else
+      case "$PREPROCESSOR" in
+      /*)
+        ;;
+      *)
+        PREPROCESSOR="$FILE_ROOT_DIR"/"$PREPROCESSOR"
+      esac
+    fi
+    # preprocess
+    cat "$fn" | "$PREPROCESSOR" > "$tmpdir/$fn_relative"
 
-  # get local eof type
-  local_eof=default
-  # get remote eof type
-  remote_eof=$(readconf "$conf_text" "$CONFIG_LABEL" 'remote_eof')
-  if [ "$remote_eof" = "" ]; then
-    remote_eof=default
-  fi
-  if [ "$local_eof" = "default" ] && [ "$remote_eof" = "win" ]; then
-    nix2win_in_place "$tmpdir/$fn_relative"
-  fi
+    # get local eof type
+    local_eof=default
+    # get remote eof type
+    remote_eof=$(readconf "$conf_text" "$CONFIG_LABEL" 'remote_eof')
+    if [ "$remote_eof" = "" ]; then
+      remote_eof=default
+    fi
+    if [ "$local_eof" = "default" ] && [ "$remote_eof" = "win" ]; then
+      nix2win_in_place "$tmpdir/$fn_relative"
+    fi
 
-  USER=$(readconf "$conf_text" "$CONFIG_LABEL" 'username')
-  PASS=$(readconf "$conf_text" "$CONFIG_LABEL" 'password')
-  HOST=$(readconf "$conf_text" "$CONFIG_LABEL" 'host')
+    USER=$(readconf "$conf_text" "$CONFIG_LABEL" 'username')
+    PASS=$(readconf "$conf_text" "$CONFIG_LABEL" 'password')
+    HOST=$(readconf "$conf_text" "$CONFIG_LABEL" 'host')
 
-  # add to transfer command
-  if [ "$SEND_USING" = "curl" ]; then
-    # transfer
-    curl -3 -v --disable-epsv --ftp-skip-pasv-ip --ftp-ssl --user "$USER:$PASS"\
-        -T "$tmpdir/$fn_relative" \
-        "ftp://${HOST}/${REMOTE_ROOT_DIR}/$fn_relative"
-  else
-    TRANS_CMD="put \"$tmpdir/$fn_relative\" \"$REMOTE_ROOT_DIR/$fn_relative\""
-    ftp -inv "$HOST" << EOF
+    # add to transfer command
+    if [ "$SEND_USING" = "curl" ]; then
+      # transfer
+      curl -3 -v --disable-epsv --ftp-skip-pasv-ip --ftp-ssl --user "$USER:$PASS"\
+          -T "$tmpdir/$fn_relative" \
+          "ftp://${HOST}/${REMOTE_ROOT_DIR}/$fn_relative"
+    else
+      TRANS_CMD="put \"$tmpdir/$fn_relative\" \"$REMOTE_ROOT_DIR/$fn_relative\""
+      ftp -inv "$HOST" << EOF
 
 user "$USER" "$PASS"
 
@@ -417,6 +419,7 @@ $TRANS_CMD
 
 bye
 EOF
+    fi
   fi
 
 done
