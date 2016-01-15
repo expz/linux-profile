@@ -93,6 +93,16 @@ mkpassc() {
   base64 /dev/urandom | tr -d "/+1lIo0Oq" | dd bs="$1" count=1 status=none | xargs echo;
 }
 
+# encrypt a file and print to stdout
+encrypt() {
+  openssl enc -e -aes-256-cbc -in "$1" -out -;
+}
+
+# decrypt a file and print to stdout
+decrypt() {
+  openssl enc -d -aes-256-cbc -d -in "$1" -out -;
+}
+
 #################################################
 # Shell Options
 
