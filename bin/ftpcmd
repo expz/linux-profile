@@ -83,11 +83,8 @@ Command Line Options
   -h
     Print this message and exit.
 
-  -k [PRIVATE_KEY_FILE]
-    Specifies to use PRIVATE_KEY_FILE to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
-
   -n
-    Do not use a key file (ftp.conf is plaintext).
+    The configuration file is not encrypted; it is plaintext.
 
   -u
     Use the program 'curl' to transfer the files.
@@ -95,6 +92,12 @@ Command Line Options
 NOTE: Does not transfer (ignores) files named 'ftp.conf'.
 EOF
 }
+
+# TODO:Implement GPG encryption using a keyfile
+#
+# Add this option:
+#  -k [PRIVATE_KEY_FILE]
+#    Specifies to use PRIVATE_KEY_FILE to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
 
 
 # encode string for url (very portable implementation)
@@ -185,11 +188,11 @@ readconf_conn() {
 
 encrypt_openssl() {
   #--cacert /etc/ssl/certs/cert.pem
-  openssl enc -e -aes-256-cbc -in "$1" -out -;
+  openssl enc -e -aes-256-cbc -in "$1";
 }
 
 decrypt_openssl() {
-  openssl enc -d -aes-256-cbc -d -in "$1" -out -;
+  openssl enc -d -aes-256-cbc -d -in "$1";
 }
 
 encrypt_gpg() {
@@ -291,7 +294,7 @@ SCRIPT_PATH=$(pwd -P)
 
 # Default options
 CONFIG_LABEL='default'
-KEY_FILE=
+CONFIG_ENC='ssl'
 SEND_USING='curl'
 
 if [ "$#" = "0" ]; then
@@ -301,26 +304,24 @@ fi
 
 # Clear these variables
 unset OPTIND nextopt
-while getopts ':fhnuc::k::' nextopt; do
+while getopts 'fhnuc:' nextopt; do
   case "$nextopt" in
     c)
-      CONFIG_LABEL="$1"
+      CONFIG_LABEL="$OPTARG"
       ;;
     f)
-      SEND_USING=ftp
+      SEND_USING='ftp'
       ;;
     h)
       usage
       exit 0
       ;;
-    k)
-      KEY_FILE="$1"
-      ;;
     n)
+      CONFIG_ENC='none'
       KEY_FILE=
       ;;
     u)
-      SEND_USING=curl
+      SEND_USING='curl'
       ;;
     *)
       usage
@@ -330,7 +331,7 @@ while getopts ':fhnuc::k::' nextopt; do
 done
 
 # shift out the switches and read the arguments (files to send)
-shift $(( OPTIND - 1 ))
+shift $(($OPTIND-1))
 
 # temp folder for holding modified files for transfer
 tmpdir="tmp$(date +%s)"
@@ -342,22 +343,22 @@ fi
 
 find "$@" -type f | while read fn
 do
+  # don't allow (presumably accidental) transfer of ftp.conf
   if [ "$(basename $fn)" != "ftp.conf" ]; then
     fn_absolute=$(absolute_path "$fn")
 
     # find configuration file
+    PREV_CONF_FILENAME="$CONF_FILENAME"
     CONF_FILENAME="$(find_config "$fn_absolute")"
 
-    # read encrypted configuration file
-    if [ "$KEY_FILE" = "" ]; then
-      conf_text="$(cat $CONF_FILENAME)"
-    else
-      conf_text=$(
-      if [ "$GPG" ]; then
-        decrypt_gpg "$CONF_FILENAME"
+    # if using a different configuration file
+    if [ "$PREV_CONF_FILENAME" != "$CONF_FILENAME" ]; then
+      # read configuration file, decrypting if necessary
+      if [ "$CONFIG_ENC" = "none" ]; then
+        conf_text="$(cat $CONF_FILENAME)"
       else
-        decrypt_openssl "$CONF_FILENAME"
-      fi)
+        conf_text=$(decrypt_openssl "$CONF_FILENAME")
+      fi
     fi
 
     # compute root dir for transferring this particular file
