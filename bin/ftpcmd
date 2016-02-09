@@ -28,7 +28,14 @@ usage() {
 cat <<EOF
 Usage: ftpcmd [opts] [file list|glob list]
  
-The ftpcmd program searches in the directory of each file for a file named ftp.conf. If it is not found, it recursively searches parent directories until it finds such a file. The ftp.conf is then decrypted using openssl aes256. The default key is ~/.ssh/id_rsa, but a different key can be supplied on the command line.
+The ftpcmd program searches in the directory of each file for a file named ftp.conf. If it is not found, it recursively searches parent directories until it finds such a file. The ftp.conf is then decrypted using openssl aes256. The default (symmetric) password file is ~/.ssh/id_rsa, but a password file can be supplied on the command line or the user can enter a password directly.
+
+Some effort has been made to make ftpcmd:
+
+* portable: bash-isms have been avoided
+* secure: variables are quoted, printf preferred to echo, etc.
+
+BUT NO GUARANTEES ARE MADE.
 
 An example configuration file:
 
@@ -74,7 +81,7 @@ would be transferred to
 
 Command Line Options
 
-  -c [CONFIG_NAME]
+  -c CONFIG_NAME
     Use the configuration in ftp.conf called CONFIG_NAME. Default is 'default'.
 
   -f
@@ -83,8 +90,14 @@ Command Line Options
   -h
     Print this message and exit.
 
+  -k PRIVATE_KEY_FILE
+    Specifies to use PRIVATE_KEY_FILE to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
+
   -n
     The configuration file is not encrypted; it is plaintext.
+
+  -p
+    Decrypt ftp.conf by prompting for a password instead of using the ssh PRIVATE_KEY_FILE.
 
   -u
     Use the program 'curl' to transfer the files.
@@ -93,16 +106,9 @@ NOTE: Does not transfer (ignores) files named 'ftp.conf'.
 EOF
 }
 
-# TODO:Implement GPG encryption using a keyfile
-#
-# Add this option:
-#  -k [PRIVATE_KEY_FILE]
-#    Specifies to use PRIVATE_KEY_FILE to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
-
-
 # encode string for url (very portable implementation)
 urlencode() {
-  echo "$1" \
+  printf %s "$1" \
     | sed \
       -e 's/%/%25/g' \
       -e 's/ /%20/g' \
@@ -140,7 +146,7 @@ find_config() {
   CURR_DIR="$(pwd -P)"
   while [ "$CURR_DIR" != "$PREV_DIR" ]; do
     if [ -e 'ftp.conf' ]; then
-      echo "$(pwd -P)/ftp.conf"
+      printf "%s/ftp.conf" "$(pwd -P)"
       # restore original directory
       cd "$SAVE_DIR"
       return
@@ -159,18 +165,18 @@ find_config() {
 readconf() {
   CONFIG_VAL=
   IN_CONFIG=false
-  echo "$1" | while read line; do
-    if LC_ALL=C echo "$line" | grep -q "^\[$2\]"; then
+  printf %s\\n "$1" | while read line; do
+    if LC_ALL=C printf %s "$line" | grep -q "^\[$2\]"; then
       # in the request config specified by arg 5
       IN_CONFIG=true
     elif "$IN_CONFIG"; then
-      if LC_ALL=C echo "$line" | grep -q "^\["; then
+      if LC_ALL=C printf %s "$line" | grep -q "^\["; then
         # now in a different config
         IN_CONFIG=false
       else
         # in the requested config
-        if [ "$(echo $line | cut -d '=' -f 1)" = "$3" ]; then
-          echo "$line" | sed -e "s/${3}=//g"
+        if [ "$(printf %s $line | cut -d '=' -f 1)" = "$3" ]; then
+          printf %s "$line" | sed -e "s/${3}=//g"
         fi
       fi
     fi
@@ -183,7 +189,7 @@ readconf_conn() {
   PASSWORD=$(readconf "$1" "$2" 'password')
   HOST=$(readconf "$1" "$2" 'host')
 
-  echo $(urlencode "$USERNAME"):$(urlencode "$PASSWORD")@"$HOST":/
+  printf "%s" $(urlencode "$USERNAME"):$(urlencode "$PASSWORD")@"$HOST":/
 }
 
 encrypt_openssl() {
@@ -193,6 +199,16 @@ encrypt_openssl() {
 
 decrypt_openssl() {
   openssl enc -d -aes-256-cbc -d -in "$1";
+}
+
+# encrypt_ssh [FILE_TO_ENCRYPT] [SSH_PRIVATE_KEY_FILENAME]
+encrypt_ssh() {
+  cat "$2" | openssl enc -aes-256-cbc -pass stdin -in "$1"
+}
+
+# decrypt_ssh [FILE_TO_DECRYPT] [SSH_PRIVATE_KEY_FILENAME]
+decrypt_ssh() {
+  cat "$2" | openssl enc -aes-256-cbc -pass stdin -d -in "$1"
 }
 
 encrypt_gpg() {
@@ -207,7 +223,7 @@ decrypt_gpg() {
       gpg --cipher-algo aes256 -d -o- - 2>/dev/null;
 } 
 
-dircount() { echo "$1" | tr /\\n \\n/ | wc -l ; }
+dircount() { printf %s "$1" | tr /\\n \\n/ | wc -l ; }
 matchstr() { case "$1" in "$2") return 0 ;; *) return 1 ;; esac ; }
 
 unregex() {
@@ -220,7 +236,7 @@ rev_str() {
   else
     STRING_TO_REVERSE="$1"
   fi
-  echo "$STRING_TO_REVERSE" | awk '
+  printf %s "$STRING_TO_REVERSE" | awk '
   { 
     n = split($0, arr, ""); 
     for(i=1; i<=n; i++) s = arr[i] s;
@@ -229,14 +245,14 @@ rev_str() {
 }
 
 file_ext() {
-  echo $(rev_str "$1" | cut -d '.' -f 1 | rev_str)
+  printf "%s" $(rev_str "$1" | cut -d '.' -f 1 | rev_str)
 }
 
 absolute_path() {
   if [ -d "$@" ]; then
-    echo $(cd "$@" && pwd -P)
+    printf "%s" $(cd "$@" && pwd -P)
   else
-    echo $(cd $(dirname "$@") && pwd -P)/$(basename "$@")
+    printf "%s" $(cd $(dirname "$@") && pwd -P)/$(basename "$@")
   fi
 }
 
@@ -247,36 +263,36 @@ nix2win_in_place() {
 # WITH BACKUP: convert *nix text files to windows saving original
 nix2win_with_bak() {
   mkdir -p "$2"
-  for fn in $(ls $(echo "$1")); do
+  for fn in $(ls $(printf %s "$1")); do
     sed -e 's/$/\r/' "$fn" > "$2"/"$fn"
   done 
 }
 
 # IN PLACE: convert *nix text files to mac overwriting original
 nix2mac_in_place() {
-  perl -i -ape 's/\r/\n/g;' $(echo "$1")
+  perl -i -ape 's/\r/\n/g;' $(printf %s "$1")
 }
 # WITH BACKUP: convert *nix text files to mac saving original
 nix2mac_with_bak() {
-  perl -i.bak -ape 's/\r/\n/g;' $(echo "$1")
+  perl -i.bak -ape 's/\r/\n/g;' $(printf %s "$1")
 }
 
 # IN PLACE: convert windows text files to *nix overwriting original
 win2nix_in_place() {
-  sed -i -e 's/\r//g' $(echo "$1")
+  sed -i -e 's/\r//g' $(printf %s "$1")
 }
 # WITH BACKUP: convert windows text files to *nix saving original
 win2nix_with_bak() {
-  sed -i.bak -e 's/\r//g' $(echo "$1")
+  sed -i.bak -e 's/\r//g' $(printf %s "$1")
 }
 
 # IN PLACE: convert mac text files to *nix overwriting original
 mac2nix_in_place() {
-  perl -i -ape 's/\n/\r/g;' $(echo "$1")
+  perl -i -ape 's/\n/\r/g;' $(printf %s "$1")
 }
 # WITH BACKUP: convert mac text files to *nix saving originals
 mac2nix_with_bak() {
-  perl -i.bak -ape 's/\n/\r/g;' $(echo "$1")
+  perl -i.bak -ape 's/\n/\r/g;' $(printf %s "$1")
 }
 
 # OVERWRITE: file.ext with file.ext.bak
@@ -294,8 +310,9 @@ SCRIPT_PATH=$(pwd -P)
 
 # Default options
 CONFIG_LABEL='default'
-CONFIG_ENC='ssl'
+CONFIG_ENC='ssh'
 SEND_USING='curl'
+ID_FILE=~/.ssh/id_rsa
 
 if [ "$#" = "0" ]; then
   usage
@@ -304,7 +321,7 @@ fi
 
 # Clear these variables
 unset OPTIND nextopt
-while getopts 'fhnuc:' nextopt; do
+while getopts 'c:fhk:npu' nextopt; do
   case "$nextopt" in
     c)
       CONFIG_LABEL="$OPTARG"
@@ -316,9 +333,16 @@ while getopts 'fhnuc:' nextopt; do
       usage
       exit 0
       ;;
+    k)
+      CONFIG_ENC='ssh'
+      ID_FILE="$OPTARG"
+      ;;
     n)
       CONFIG_ENC='none'
       KEY_FILE=
+      ;;
+    p)
+      CONFIG_ENC='ssl'
       ;;
     u)
       SEND_USING='curl'
@@ -336,8 +360,8 @@ shift $(($OPTIND-1))
 # temp folder for holding modified files for transfer
 tmpdir="tmp$(date +%s)"
 if ! mkdir -p "$tmpdir" ; then
-  echo "could not make temp directory: '$tmpdir'"
-  echo "aborting."
+  printf "could not make temp directory: '%s'\\n" "$tmpdir"
+  printf "aborting.\\n"
   exit 2
 fi
 
@@ -356,6 +380,8 @@ do
       # read configuration file, decrypting if necessary
       if [ "$CONFIG_ENC" = "none" ]; then
         conf_text="$(cat $CONF_FILENAME)"
+      elif [ "$CONFIG_ENC" = "ssh" ]; then
+        conf_text=$(decrypt_ssh "$CONF_FILENAME" "$ID_FILE")
       else
         conf_text=$(decrypt_openssl "$CONF_FILENAME")
       fi
