@@ -95,13 +95,21 @@ mkpassc() {
 
 # encrypt a file and print to stdout
 encrypt() {
-  openssl enc -e -aes-256-cbc -in "$1" -out -;
+  openssl enc -aes-256-cbc -salt -in "$1";
 }
 
 # decrypt a file and print to stdout
 decrypt() {
-  openssl enc -d -aes-256-cbc -d -in "$1" -out -;
+  openssl enc -d -aes-256-cbc -salt -in "$1";
 }
+
+encrypt_ssh() {
+  openssl enc -aes-256-cbc -salt -kfile ~/.ssh/id_rsa -in "$1";
+}
+
+decrypt_ssh() {
+   openssl enc -d -aes-256-cbc -salt -kfile ~/.ssh/id_rsa -in "$1";
+ } 
 
 #################################################
 # Shell Options

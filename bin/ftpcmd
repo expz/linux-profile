@@ -28,7 +28,7 @@ usage() {
 cat <<EOF
 Usage: ftpcmd [opts] [file list|glob list]
  
-The ftpcmd program searches in the directory of each file for a file named ftp.conf. If it is not found, it recursively searches parent directories until it finds such a file. The ftp.conf is then decrypted using openssl aes256. The default (symmetric) password file is ~/.ssh/id_rsa, but a password file can be supplied on the command line or the user can enter a password directly.
+The ftpcmd program searches in the directory of each file for a file named ftp.conf. If it is not found, it recursively searches parent directories until it finds such a file. The ftp.conf is then decrypted using openssl aes256 with salt. The default (symmetric) password file is ~/.ssh/id_rsa, but a password file can be supplied on the command line or the user can enter a password directly.
 
 Some effort has been made to make ftpcmd:
 
@@ -91,7 +91,7 @@ Command Line Options
     Print this message and exit.
 
   -k PRIVATE_KEY_FILE
-    Specifies to use PRIVATE_KEY_FILE to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
+    Specifies to use PRIVATE_KEY_FILE (as password) to decrypt ftp.conf connection information. Default is '~/.ssh/id_rsa'.
 
   -n
     The configuration file is not encrypted; it is plaintext.
@@ -194,21 +194,21 @@ readconf_conn() {
 
 encrypt_openssl() {
   #--cacert /etc/ssl/certs/cert.pem
-  openssl enc -e -aes-256-cbc -in "$1";
+  openssl enc -aes-256-cbc -salt -in "$1";
 }
 
 decrypt_openssl() {
-  openssl enc -d -aes-256-cbc -d -in "$1";
+  openssl enc -d -aes-256-cbc -salt -in "$1";
 }
 
 # encrypt_ssh [FILE_TO_ENCRYPT] [SSH_PRIVATE_KEY_FILENAME]
 encrypt_ssh() {
-  cat "$2" | openssl enc -aes-256-cbc -pass stdin -in "$1"
+  openssl enc -aes-256-cbc -salt -kfile "$2" -in "$1"
 }
 
 # decrypt_ssh [FILE_TO_DECRYPT] [SSH_PRIVATE_KEY_FILENAME]
 decrypt_ssh() {
-  cat "$2" | openssl enc -aes-256-cbc -pass stdin -d -in "$1"
+  openssl enc -d -aes-256-cbc -salt -kfile "$2" -in "$1"
 }
 
 encrypt_gpg() {

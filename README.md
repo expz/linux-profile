@@ -20,9 +20,9 @@ usage: install.sh [--clean|--only-clean|--help]
 
 Includes:
 
-* vim with a few vundle plugins and conservative config
+* vim with a conservative config and a few vundle plugins (many more can be uncommented in .vimrc)
 * bashrc with a few functions, e.g., for making passwords and encrypting
-* user bin directory with a few scripts, e.g., for ftp
+* user bin directory with a few scripts, *especially an ftp transfer script `ftpcmd`*
 
 To install:
 
