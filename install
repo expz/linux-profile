@@ -3,6 +3,7 @@
 # This file should be in a *recursive* clone of the git repo:
 # 
 #   git clone --recursive https://github.com/expz/linux-profile.git
+#   (or retroactively: git submodule update --init --recursive)
 #
 # This script installs the linux profile into the current user's home directory.
 #
@@ -46,7 +47,7 @@ case "$1" in
     INSTALL=false
     CLEAN=true
     ;;
-  '--help')
+  *)
     INSTALL=false
     CLEAN=false
     printf "installs profile and saves existing files to backups copies in the same
@@ -57,13 +58,13 @@ If there are errors, make sure you executed a recursive clone of the git repo:
   git clone --recursive https://github.com/expz/linux-profile.git
   (or retroactively: git submodule update --init --recursive)
 
-usage: install.sh [--clean|--only-clean|--help]
+usage: install [--clean|--only-clean|--help]
 
 --clean       install and delete backup copies
 --only-clean  only delete backup copies (confirm each deletion)
 --help        display this message
 "
-    exit 0 
+    exit 1 
     ;;
 esac
 

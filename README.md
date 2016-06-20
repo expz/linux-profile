@@ -3,7 +3,7 @@
 A linux profile with a considerate install script.
 
 ```
-install.sh
+install
 
 installs profile and saves existing files to backups copies in the same
 directory with the suffix '-replaced-[DATE]'.
@@ -13,7 +13,7 @@ If there are errors, make sure you executed a recursive clone of the git repo:
   git clone --recursive https://github.com/expz/linux-profile.git
   (or retroactively: git submodule update --init --recursive)
 
-usage: install.sh [--clean|--only-clean|--help]
+usage: install [--clean|--only-clean|--help]
 
 --clean       install and delete backup copies
 --only-clean  only delete backup copies (confirm each deletion)
