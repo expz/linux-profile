@@ -51,8 +51,8 @@ usage: install [--clean|--only-clean|--help]
 cd ~
 git clone --depth=1 --branch=master --recursive \
   https://gitlab.com/expz/linux-profile.git
-chmod 744 linux-profile/install.sh
-./linux-profile/install.sh
+chmod 744 linux-profile/install
+./linux-profile/install
 ```
 
 Then give .bashrc a quick check to see whether any lines (esp. directories to 
