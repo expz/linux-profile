@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# Setup Fedora Workstation 23: Non-root User at Boot 2
+#
+
+# fail on error
+set -e
+# include file
+. ./setup-include.sh
+# config variables
+. ./config.sh
+
+
+#############################
+#
+# Install Linux Profile
+#
+#############################
+
+install_linux_profile() {
+  git clone --recursive https://github.com/expz/linux-profile.git ~
+  cd ~/linux-profile/
+  ./install.sh 
+}
+
+
+#############################
+#
+# Restore Backup
+#
+#############################
+
+restore_backups() {
+  echo "
+Restore backups using rsync:
+
+  cd /run/media/$(whoami)/UUID-OF-EXTERNAL-DRIVE
+  rsync -zuav external/folder/* /zones/zfs-destination
+"
+}
+
+
+#############################
+#
+# Generate SSH Keys
+#
+#############################
+
+generate_keys() {
+  ssh-keygen -t rsa -b 4096 -C ${SSH_EMAIL}
+}
+
+
+#############################
+#
+# Configure Git
+#
+#############################
+
+configure_git() {
+  git config --global user.name "$GIT_NAME"
+  git config --global user.email "$GIT_EMAIL"
+}
+
+
+####################################
+#
+# run with confirmation
+#
+####################################
+
+echo "
+Press CTRL+C to exit at any time...
+"
+
+confirm_run update_fedora "install linux profile for user '$(whoami)'"
+confirm_run restore_backups "restore backups"
+confirm_run generate_keys "generate ~/.ssh/id_rsa ssh keys for email '$SSH_EMAIL'"
+confirm_run configure_git "configure git with name '$GIT_NAME' and email '$GIT_EMAIL'"
+

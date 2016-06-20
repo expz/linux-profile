@@ -1,0 +1,200 @@
+#!/bin/sh
+#
+# Setup for Fedora Workstation 23: Root at Boot 2
+#
+
+# fail on error
+set -e
+# include file
+. ./setup-include.sh
+# config variables
+. ./config.sh
+
+if ! sudo /bin/true ; then
+  echo This script must be run with sudo privileges.
+  exit -1
+fi
+
+
+#############################
+#
+# Finish Install ZFS (native)
+#
+#############################
+
+finish_zfs_install() {
+	# check spl was loaded by reading spl version
+	dkms status spl
+	# build kernels with spl and zfs
+	dkms install spl/${ZFS_VERSION}
+	dkms install zfs/${ZFS_VERSION}
+	/sbin/modprobe spl
+	/sbin/modprobe zfs
+	zpool status
+
+	echo "
+
+	Example zpool and zfs creation with mirrored disks /dev/sdb and /dev/sdc:
+
+		zpool create -f -o cachefile=none -m /zones zones mirror sdb sdc
+		zpool list
+		zfs create -p -o compression=on zones/devops
+		zfs create -p -o compression=on zones/src
+		zfs list
+    chown -R $(whoami):$(whoami) /zones
+
+	"
+}
+
+
+#############################
+#
+# Install ZFS (non-native)
+#
+#############################
+
+# disabled
+install_zfs_fuse() {
+	dnf install zfs-fuse
+	ln -s /usr/bin/zpool /usr/sbin/zpool
+	systemctl start zfs-fuse
+	systemctl enable zfs-fuse
+}
+
+
+#############################
+#
+# Install Docker
+#
+#############################
+
+create_docker_zpool_volume() {
+  echo '
+The default Fedora install creates a root LVM volume. Shrink it to make room for a ZFS volume by booting into a live USB environment and running the following commands:
+
+	1. decrypt volume group if necessary (enter correct drive partition for sdx5):
+	
+    udisksctl unlock -b /dev/sdx5
+
+	2. find fedora root group and volume name in the list of volumes
+	  
+    lvs
+
+  3. check filesystem (quick)
+	
+    e2fsck -f /dev/volgroup_name/vol_name
+
+  4. shrink filesystem to 64GiB
+
+  	resize2fs -p /dev/volgroup_name/vol_name 64G
+
+  5. shrink volume to 64GiB
+
+  	lvreduce -L  64G /dev/VOLGROUP_NAME/VOL_NAME
+
+	6. check result
+
+  	lvs
+
+Then create an LVM volume for ZFS:
+	
+  7. create logial volume ("zroot" is an arbitrary volume name)
+
+  	lvcreate -l 100%FREE -n zroot VOLGROUP_NAME
+
+  8. view LVM volumes, check it was created
+	
+    lvs
+   	lsblk
+
+Then restart and run the zpool creation step.
+
+  '
+}
+
+create_docker_zpool() {
+	# create the zpool and call it 'zroot'
+	zpool create -f -o ashift=12 zroot /dev/${ZFS_VOLGROUP}/${ZFS_VOLNAME}
+	# create a zone for docker
+	zfs create -o compression=on -o mountpoint=/var/lib/docker zroot/docker
+	# check that it is loaded
+	zfs list
+}
+
+install_docker() {
+	dnf install docker
+	systemctl start docker.service
+	systemctl enable docker.service
+}
+
+#############################
+#
+# Install VyprVPN (native)
+#
+#############################
+
+install_vyprvpn() {
+	# install vyprvpn
+	dnf install openvpn
+	wget -O /etc/openvpn/ca.vyprvpn.com.crt \
+		https://support.goldenfrog.com/hc/en-us/article_attachments/205312238/ca.vyprvpn.com.crt
+	chown user:user /etc/openvpn/ca.vyprvpn.com.crt
+	echo '
+
+	Steps to configure VyprVPN in Gnome:
+
+	1. open Wi-Fi Settings
+	2. click + button
+	3.
+		a. connection type: VPN
+		b. vpn type: OpenVPN
+		c. connection name: VPN [City, Country]
+			 gateway: us1.vpn.goldenfrog.com
+			 type: Password
+			 user name: email used for registering with Golden Frog
+			 password: Golden Frog website password
+			 ca certificate: /etc/openvpn/ca.vyprvpn.com.crt
+			 click the Advanced... button
+					Use LZO data compression: checked
+					click OK
+			 click Apply
+
+	'
+}
+
+
+# disabled
+monitor_setup() {
+  echo '
+
+	Example monitor setup:
+
+	xrandr --output DVI-I-1 --mode 1920x1080 --pos 0x0
+	xrandr --output VGA-1 --mode 1920x1080 --left-of DVI-I-1
+	xrandr --output VGA-1-2 --mode 1680x1050 --below VGA-1
+	xrandr --output DVI-I-1-2 --mode 1680x1050 --below DVI-I-1
+
+	# debug monitor setup
+	journalctl | tail
+	dmesg | tail
+	vim /var/log/Xorg.0.log 
+
+	'
+}
+
+
+####################################
+#
+# run with confirmation
+#
+####################################
+
+echo "
+Press CTRL+C to exit at any time...
+"
+
+confirm_run finish_zfs_install "finish zfs install for zfs ${ZFS_VERSION}"
+confirm_run create_docker_zpool "create zpool for docker in LVM volume /dev/${ZFS_VOLGROUP}/${ZFS_VOLNAME}"
+confirm_run install_docker "install and start docker"
+confirm_run install_vyprvpn "install vyprvpn"
+

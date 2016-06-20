@@ -1,0 +1,222 @@
+#!/bin/sh
+#
+# Setup for Fedora Workstation 23: Root at Boot 1
+#
+
+# fail on error
+set -e
+# include file
+. ./setup-include.sh
+# config variables
+. ./config.sh
+
+if ! sudo /bin/true ; then
+  echo This script must be run with sudo privileges.
+  exit -1
+fi
+
+
+update_fedora() {
+  dnf update
+}
+
+#############################
+#
+# Install Configure Hostname
+#
+#############################
+
+# setup hostnames
+setup_hostnames() {
+  cat << EOF > /etc/hosts
+127.0.0.1       ${HOSTNAME}.${DOMAINNAME} ${HOSTNAME} localhost.localdomain localhost
+::1		localhost6.localdomain6 localhost6
+
+${ROUTER_IP}    ${ROUTER_HOSTNAME}.${DOMAINNAME} ${HOSTNAME}
+EOF
+}
+
+
+#############################
+#
+# Install Utilities
+#
+#############################
+
+install_cmd_utilities() {
+  dnf install git vim-enhanced lsof iftop p7zip p7zip-plugins dash
+}
+
+install_gnome_utilities() {
+  dnf install guake gnome-tweak-tool
+  echo '
+
+Open 'Gnome Tweak Tool':
+
+  1. For VIM users:
+    Typing => Caps Lock key behavior => Make Caps Lock an additional ESC
+  2. For Shell users:
+    Startup Applications => Click + button => Add "Guake Terminal"
+  3. Show date:
+    Top Bar => Clock => Show date
+  4. Easier tabbing:
+    Extensions => Alternatetab 
+
+  '
+}
+
+install_linux_profile() {
+  git clone --recursive https://expz@github.com/expz/linux-profile.git ~
+  cd ~/linux-profile/
+  ./install.sh
+}
+
+
+#############################
+#
+# Install Google Chrome
+#
+#############################
+
+install_chrome() {
+	cat << EOF > /etc/yum.repos.d/google-chrome.repo
+[google-chrome]
+name=google-chrome - \$basearch
+baseurl=http://dl.google.com/linux/chrome/rpm/stable/\$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub
+EOF
+	dnf install google-chrome-stable
+}
+
+
+#############################
+#
+# Install VirtualBox
+#
+#############################
+
+install_virtualbox() {
+	wget http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo
+	mv virtualbox.repo /etc/yum.repos.d/
+	dnf install binutils gcc make patch libgomp glibc-headers glibc-devel kernel-headers kernel-devel dkms
+	dnf install VirtualBox-${VIRTUALBOX_MAJOR_VERSION}
+	/usr/lib/virtualbox/vboxdrv.sh setup
+	usermod -a -G vboxusers ${NON_ROOT_USER}
+	/sbin/rcvboxdrv setup
+}
+
+
+#############################
+#
+# Install KVM Support
+#
+#############################
+
+install_kvm() {
+	dnf groupinfo virtualization
+	dnf group install with-optional virtualization
+	systemctl start libvirtd
+	systemctl enable libvirtd
+}
+
+
+#############################
+#
+# Install Multimedia Support
+#
+#############################
+
+install_multimedia() {
+	dnf install http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${FEDORA_VERSION}.noarch.rpm \
+		http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${FEDORA_VERSION}.noarch.rpm
+	cd /etc/yum.repos.d/
+	echo '
+
+WARNING: If the next commands fail, try using packages for a previous version of Fedora, e.g., sed -i -e 's/\$releasever/23/g' rpmfusion-*.repo
+
+'
+	dnf install --allowerasing ftp://rpmfind.net/linux/fedora/linux/releases/${FEDORA_VERSION}/Everything/x86_64/os/Packages/c/compat-nettle27-2.7.1-1.fc${FEDORA_VERSION}.i686.rpm
+	dnf install gstreamer1-plugins-base gstreamer1-plugins-good gstreamer1-plugins-good-extras gstreamer1-plugins-ugly
+	dnf install python-gstreamer1 python3-gstreamer1
+}
+
+
+#############################
+#
+# Install KeepassX 2
+#
+#############################
+
+install_keepassx() {
+  # the code for this build is publicly available on github
+	cat << 'EOF' > /etc/yum.repos.d/copr-keepassx.repo
+[georgespk-keepassx]
+name=Copr repo for keepassx owned by georgespk
+baseurl=https://copr-be.cloud.fedoraproject.org/results/georgespk/keepassx/fedora-$releasever-$basearch/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/georgespk/keepassx/pubkey.gpg
+enabled=1
+enabled_metadata=1
+EOF
+	dnf repolist
+	dnf install keepassx
+}
+
+
+#############################
+#
+# Install ZFS (native)
+#
+#############################
+
+install_zfs() {
+  echo '
+
+WARNING: If these commands fail, then try using a url for a previous version of fedora. In that case, edit zfs.repo to change \$releasever to the previous version number.
+
+'
+  dnf install --nogpgcheck http://archive.zfsonlinux.org/fedora/zfs-release.f${FEDORA_VERSION}.noarch.rpm
+	gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+	vim /etc/yum.repos.d/zfs.repo
+
+	# make sure kernel is up-to-date
+	dnf install kernel-devel zfs
+}
+
+
+#############################
+#
+# Reboot to Updated Kernel
+#
+#############################
+
+reboot_now() {
+  reboot
+}
+
+
+####################################
+#
+# run with confirmation
+#
+####################################
+
+echo "
+Press CTRL+C to exit at any time...
+"
+
+confirm_run update_fedora "update fedora packages"
+confirm_run install_cmd_utilities "install command line utilities"
+confirm_run install_gnome_utilities "install gnome utilities"
+confirm_run install_linux_profile "install linux profile for user '$(whoami)'"
+confirm_run install_chrome "install google chrome"
+confirm_run install_virtualbox "install virtualbox with major version ${VIRTUALBOX_MAJOR_VERSION}"
+confirm_run install_kvm "install kvm virtualization support"
+confirm_run install_multimedia "install multimedia support for fedora version ${FEDORA_VERSION}"
+confirm_run install_keepassx "install keepassx 2"
+confirm_run install_zfs "install zfs for fedora version ${FEDORA_VERSION}"
+
+confirm_run reboot_now "reboot now to finish installations"
