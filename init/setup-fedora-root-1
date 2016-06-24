@@ -178,7 +178,7 @@ install_zfs() {
 WARNING: If these commands fail, then try using a url for a previous version of fedora. In that case, edit zfs.repo to change \$releasever to the previous version number.
 
 '
-  dnf install --nogpgcheck http://archive.zfsonlinux.org/fedora/zfs-release.f${FEDORA_VERSION}.noarch.rpm
+  dnf install --nogpgcheck http://archive.zfsonlinux.org/fedora/zfs-release.fc${FEDORA_VERSION}.noarch.rpm
 	gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
 	vim /etc/yum.repos.d/zfs.repo
 
