@@ -10,7 +10,9 @@
 #############################
 
 
-export FEDORA_VERSION=23
+export FEDORA_VERSION=24
+# used for packages which are not yet released for the newest version of fedora
+export FEDORA_FALLBACK_VERSION=23
 
 export VIRTUALBOX_MAJOR_VERSION=5.0
 export NON_ROOT_USER=user

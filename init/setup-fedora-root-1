@@ -129,15 +129,15 @@ install_kvm() {
 #############################
 
 install_multimedia() {
-	dnf install http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${FEDORA_VERSION}.noarch.rpm \
-		http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${FEDORA_VERSION}.noarch.rpm
+	dnf install http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${FEDORA_FALLBACK_VERSION}.noarch.rpm \
+		http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${FEDORA_FALLBACK_VERSION}.noarch.rpm
 	cd /etc/yum.repos.d/
 	echo '
 
 WARNING: If the next commands fail, try using packages for a previous version of Fedora, e.g., sed -i -e 's/\$releasever/23/g' rpmfusion-*.repo
 
 '
-	dnf install --allowerasing ftp://rpmfind.net/linux/fedora/linux/releases/${FEDORA_VERSION}/Everything/x86_64/os/Packages/c/compat-nettle27-2.7.1-1.fc${FEDORA_VERSION}.i686.rpm
+	dnf install --allowerasing ftp://rpmfind.net/linux/fedora/linux/releases/${FEDORA_FALLBACK_VERSION}/Everything/x86_64/os/Packages/c/compat-nettle27-2.7.1-1.fc${FEDORA_FALLBACK_VERSION}.i686.rpm
 	dnf install gstreamer1-plugins-base gstreamer1-plugins-good gstreamer1-plugins-good-extras gstreamer1-plugins-ugly
 	dnf install python-gstreamer1 python3-gstreamer1
 }
@@ -178,12 +178,16 @@ install_zfs() {
 WARNING: If these commands fail, then try using a url for a previous version of fedora. In that case, edit zfs.repo to change \$releasever to the previous version number.
 
 '
-  dnf install --nogpgcheck http://archive.zfsonlinux.org/fedora/zfs-release.fc${FEDORA_VERSION}.noarch.rpm
+  dnf install -y --nogpgcheck http://archive.zfsonlinux.org/fedora/zfs-release.fc${FEDORA_FALLBACK_VERSION}.noarch.rpm
 	gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
-	vim /etc/yum.repos.d/zfs.repo
+  if [ "$FEDORA_FALLBACK_VERSION" != "$FEDORA_VERSION" ]; then
+    sed -i -e "s/\\\$releasever/$FEDORA_FALLBACK_VERSION/g" \
+      /etc/yum.repos.d/zfs.repo
+  fi
 
 	# make sure kernel is up-to-date
-	dnf install kernel-devel zfs
+  dnf upgrade -y kernel-headers kernel-core
+	dnf install -y kernel-devel zfs
 }
 
 
@@ -215,8 +219,8 @@ confirm_run install_linux_profile "install linux profile for user '$(whoami)'"
 confirm_run install_chrome "install google chrome"
 confirm_run install_virtualbox "install virtualbox with major version ${VIRTUALBOX_MAJOR_VERSION}"
 confirm_run install_kvm "install kvm virtualization support"
-confirm_run install_multimedia "install multimedia support for fedora version ${FEDORA_VERSION}"
+confirm_run install_multimedia "install multimedia support for fedora version ${FEDORA_FALLBACK_VERSION}"
 confirm_run install_keepassx "install keepassx 2"
-confirm_run install_zfs "install zfs for fedora version ${FEDORA_VERSION}"
+confirm_run install_zfs "install zfs for fedora version ${FEDORA_FALLBACK_VERSION}"
 
 confirm_run reboot_now "reboot now to finish installations"
