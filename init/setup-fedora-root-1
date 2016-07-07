@@ -138,7 +138,15 @@ WARNING: If the next commands fail, try using packages for a previous version of
 
 '
 	dnf install --allowerasing ftp://rpmfind.net/linux/fedora/linux/releases/${FEDORA_FALLBACK_VERSION}/Everything/x86_64/os/Packages/c/compat-nettle27-2.7.1-1.fc${FEDORA_FALLBACK_VERSION}.i686.rpm
-	dnf install gstreamer1-plugins-base gstreamer1-plugins-good gstreamer1-plugins-good-extras gstreamer1-plugins-ugly
+	dnf install \
+    gstreamer1-plugins-base \
+    gstreamer1-plugins-good \
+    gstreamer1-plugins-good-extras \
+    gstreamer1-plugins-bad-free \
+    gstreamer1-plugins-bad-freeworld \
+    gstreamer1-plugins-ugly \
+    gstreamer1-libav \
+    gstreamer1-vaapi
 	dnf install python-gstreamer1 python3-gstreamer1
 }
 
