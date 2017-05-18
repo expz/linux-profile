@@ -118,6 +118,7 @@ Plugin 'vim-syntastic/syntastic'  " Syntax checking
 " Plugin 'vim-scripts/taglist.vim'  " Overview of structure of source code
 " Plugin 'tomtom/tlib_vim'  " Lib required for SnipMate Python snippets
 " Plugin 'MarcWeber/vim-addon-mw-utils'  " Utils required for SnipMate
+Plugin 'Chiel92/vim-autoformat'  " Autoformat code using external programs
 " Plugin 'sophacles/vim-bundle-mako'  " Python template library
 Plugin 'tpope/vim-commentary'  " Light-weight comment out lines
 " Plugin 'mbbill/VimExplorer'  " Powerful file manager
