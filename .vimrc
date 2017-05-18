@@ -109,11 +109,11 @@ Plugin 'pthrasher/conqueterm-vim'  " Use shell from vim
 " Plugin 'LaTeX-Box-Team/LaTeX-Box'  " LaTeX commands
 Plugin 'scrooloose/nerdtree'  " File navigation
 Plugin 'myusuf3/numbers.vim'  " Better line numbers
-Plugin 'vim-scripts/pydoc.vim'  " Search Python documentation
+" Plugin 'vim-scripts/pydoc.vim'  " Search Python documentation
 " Plugin 'python-rope/ropevim'  " rope Python refactoring library
 Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
 "" OLD Plugin 'ervandrew/supertab'  " auto-completion using Tab
-Plugin 'scrooloose/syntastic'  " Syntax checking
+Plugin 'vim-syntastic/syntastic'  " Syntax checking
 " Plugin 'kien/tabman.vim'  " Close tabs without switching to them
 " Plugin 'vim-scripts/taglist.vim'  " Overview of structure of source code
 " Plugin 'tomtom/tlib_vim'  " Lib required for SnipMate Python snippets
@@ -121,14 +121,14 @@ Plugin 'scrooloose/syntastic'  " Syntax checking
 " Plugin 'sophacles/vim-bundle-mako'  " Python template library
 Plugin 'tpope/vim-commentary'  " Light-weight comment out lines
 " Plugin 'mbbill/VimExplorer'  " Powerful file manager
-Plugin 'nvie/vim-flake8'  " Python syntax/style checker
+" Plugin 'nvie/vim-flake8'  " Python syntax/style checker
 Plugin 'tpope/vim-fugitive'  " GIT repositories
 Plugin 'tpope/vim-markdown'  " Markdown
 " Plugin 'vim-pandoc/vim-pandoc'  " Pandoc markdown, etc
 " Plugin 'vim-pandoc/vim-pandoc-syntax'  " Pandoc syntax help
 Plugin 'derekwyatt/vim-scala'  " Scala
 Plugin 'mpollmeier/vim-scalaConceal'  " Allow UTF-8 method names for Scala
-Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
+" Plugin 'tpope/vim-vinegar'  " Slightly extended netrw file explorer
 " Plugin 'justinmk/vim-sneak'  " Best seeking library
 " Plugin 'garbas/vim-snipmate'  " Insert Python snippets
 " Plugin 'honza/vim-snippets'  " Collection of snippets
@@ -242,6 +242,11 @@ if has('statusline')
 
     " Line and column position and counts.
     set statusline+=\ (line\ %l\/%L,\ col\ %03c)
+
+    " Syntastic
+    set statusline+=%#warningmsg#
+    set statusline+=%{SyntasticStatuslineFlag()}
+    set statusline+=%*
 endif
 
 " }}}
@@ -265,7 +270,7 @@ augroup END
 augroup ft_python
     au!
 
-    au FileType python setlocal tabstop=8 expandtab shiftwidth=4 softtabstop=4
+    au FileType python setlocal tabstop=4 expandtab shiftwidth=4 softtabstop=4
     au FileType python filetype indent on
 
     au FileType python setlocal omnifunc=pythoncomplete#Complete
@@ -318,6 +323,15 @@ augroup END
 "   > vim-markdown ______________ {{{
 
     let g:vim_markdown_folding_disabled=1
+
+"   }}}
+"   > vim-syntastic ______________ {{{
+"
+    let g:syntastic_always_populate_loc_list = 1
+    let g:syntastic_auto_loc_list = 1
+    let g:syntastic_check_on_open = 1
+    let g:syntastic_check_on_wq = 0
+    let g:syntastic_python_checker = 'flake8'
 
 "   }}}
 " }}}

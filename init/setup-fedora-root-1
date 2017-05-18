@@ -74,6 +74,19 @@ install_linux_profile() {
 
 #############################
 #
+# Install Python 3 With Utilities
+#
+#############################
+
+install_python3() {
+	dnf install python3 python3-pip
+  ln -s /usr/lib/python3.5/site-packages/pip/pip /usr/bin/pip3
+  python3 -m pip install flake8
+}
+
+
+#############################
+#
 # Install Google Chrome
 #
 #############################
@@ -224,6 +237,7 @@ confirm_run update_fedora "update fedora packages"
 confirm_run install_cmd_utilities "install command line utilities"
 confirm_run install_gnome_utilities "install gnome utilities"
 confirm_run install_linux_profile "install linux profile for user '$(whoami)'"
+confirm_run install_python3 "install python 3 with flake8"
 confirm_run install_chrome "install google chrome"
 confirm_run install_virtualbox "install virtualbox with major version ${VIRTUALBOX_MAJOR_VERSION}"
 confirm_run install_kvm "install kvm virtualization support"
