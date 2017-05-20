@@ -335,6 +335,12 @@ augroup END
     let g:syntastic_python_checkers = ['flake8']
 
 "   }}}
+"   > vim-autoformat ______________ {{{
+"
+    let g:formatdef_yapf = "'yapf --lines '.a:firstline.'-'.a:lastline"
+    let g:formatters_python = ['yapf']
+
+"   }}}
 " }}}
 " Remappings --------------------------------------------------------------- {{{
 "   > General _______________ {{{

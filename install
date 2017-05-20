@@ -47,6 +47,8 @@ case "$1" in
     INSTALL=false
     CLEAN=true
     ;;
+  '')
+    ;;
   *)
     INSTALL=false
     CLEAN=false
