@@ -1,6 +1,6 @@
 # Linux Profile
 
-A linux profile with a considerate install script.
+A linux profile with a considerate install script and a conservative vim configuration.
 
 ```
 install
@@ -47,6 +47,8 @@ usage: install [--clean|--only-clean|--help]
 
 ### Linux Profile
 
+The install script backs up the current `~/.bashrc`, `~/.vimrc`, `~/.vim/` and `~/.vundle/` by appending a suffix like `-replaced-YYYY-MM-DD`. Then it copies new versions in their place.
+
 ```
 cd ~
 git clone --depth=1 --branch=master --recursive \
@@ -57,3 +59,14 @@ chmod 744 linux-profile/install
 
 Then give .bashrc a quick check to see whether any lines (esp. directories to 
 add to the path) should be uncommented.
+
+### Vim Plugin Dependencies (Optional)
+
+__If you did not run the Fedora First-Time Setup scripts, then a few packages need to be installed for some vim plugins to work.__
+
+#### Python
+
+To enable python style checking (automatic on file load) and autoformatting (`:Autoformat` command), run
+```
+python3 -m pip install flake8 yapf
+```
