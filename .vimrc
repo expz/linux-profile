@@ -111,7 +111,7 @@ Plugin 'scrooloose/nerdtree'  " File navigation
 Plugin 'myusuf3/numbers.vim'  " Better line numbers
 " Plugin 'vim-scripts/pydoc.vim'  " Search Python documentation
 " Plugin 'python-rope/ropevim'  " rope Python refactoring library
-Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
+" Plugin 'ktvoelker/sbt-vim'  " SBT Vim Bridge
 "" OLD Plugin 'ervandrew/supertab'  " auto-completion using Tab
 Plugin 'vim-syntastic/syntastic'  " Syntax checking
 " Plugin 'kien/tabman.vim'  " Close tabs without switching to them
