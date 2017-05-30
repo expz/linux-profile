@@ -11,9 +11,11 @@
 ##################################################
 # Environment Variables
 
+# paths relative to home directory
 extrapath='
 bin
 opt/packer/bin
+.local/bin
 '
 
 for dn in $extrapath; do
