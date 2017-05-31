@@ -89,6 +89,16 @@ if "$INSTALL"; then
 
   # install plugins using vundle
   vim +BundleInstall +qall
+
+  echo
+  echo
+  echo '
+If there were errors, did you make sure to clone the repo using the
+--recursive flag? If not, then run:
+
+git submodule update --init --recursive
+'
+
 fi
 
 if "$CLEAN"; then
