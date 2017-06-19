@@ -62,7 +62,7 @@ add to the path) should be uncommented.
 
 ### Vim Plugin Dependencies (Optional)
 
-__If you did not run the Fedora First-Time Setup scripts, then a few packages need to be installed for some vim plugins to work.__
+If you did not run the Fedora First-Time Setup scripts, then a few packages need to be manually installed for some vim plugins to work. This is explained below.
 
 #### Python
 
@@ -70,3 +70,11 @@ To enable python style checking (automatic on file load) and autoformatting (`:A
 ```
 python3 -m pip install flake8 yapf
 ```
+
+#### Javascript
+
+To enable Javascript style checking and autoformatting, run
+```
+sudo npm install -g jshint js-beautify
+```
+This requires `npm` (node package manager), which can be installed on Ubuntu with `sudo apt-get install nodejs npm`.

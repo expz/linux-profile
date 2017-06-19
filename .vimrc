@@ -260,7 +260,11 @@ set showmatch
 
 " }}}
 " Filetype-specific settings ----------------------------------------------- {{{
-"   > Markdown ___________________ {{{
+"   > HTML __________________ {{{
+"   Highlight .j2 files as html files
+au BufNewFile,BufRead *.j2 setlocal ft=html
+"   }}}
+"   > Markdown ______________ {{{
 augroup ft_md
     au!
 
@@ -284,7 +288,7 @@ augroup ft_quickfix
     au Filetype qf setlocal colorcolumn=0 nolist nocursorline nowrap
 augroup END
 "   }}}
-"   > Scala ____________ {{{
+"   > Scala _________________ {{{
 augroup ft_scala
     au!
 
@@ -333,6 +337,7 @@ augroup END
     let g:syntastic_check_on_open = 1
     let g:syntastic_check_on_wq = 0
     let g:syntastic_python_checkers = ['flake8']
+    let g:syntastic_javascript_checkers = ['jshint']
 
 "   }}}
 "   > vim-autoformat ______________ {{{

@@ -87,6 +87,18 @@ install_python3() {
 
 #############################
 #
+# Install Python 3 With Utilities
+#
+#############################
+
+install_nodejs() {
+	dnf install nodejs npm
+  npm install -g jshint js-beautify
+}
+
+
+#############################
+#
 # Install Google Chrome
 #
 #############################
