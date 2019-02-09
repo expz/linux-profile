@@ -50,6 +50,13 @@ export NVM_DIR="$HOME/.nvm"
 
 export ENVIRONMENT=development
 
+# Add RVM to PATH for scripting and enable it to activate ruby
+export PATH="$PATH:$HOME/.rvm/bin"
+if test -f ~/.rvm/scripts/rvm; then
+  # Must be run when not using a login shell.
+  [ "$(type -t rvm)" = "function" ] || source ~/.rvm/scripts/rvm;
+fi
+
 #################################################
 
 # If not running interactively, don't do anything else
