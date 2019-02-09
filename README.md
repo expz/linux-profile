@@ -12,6 +12,7 @@ installs the following files and folders:
   ~/.vimrc
   ~/.bashrc
   ~/.pystartup
+  ~/.flake8
 
 while saving existing files first to backups copies in the same
 directory with the suffix '-replaced-[TIMESTAMP]'.

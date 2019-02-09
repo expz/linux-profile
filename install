@@ -59,6 +59,7 @@ case "$1" in
   ~/.vimrc
   ~/.bashrc
   ~/.pystartup
+  ~/.flake8
 
 while saving existing files first to backups copies in the same
 directory with the suffix '-replaced-[TIMESTAMP]'.
@@ -94,11 +95,11 @@ if "$INSTALL"; then
   safe_copy '.vundle' "$HOME_DIR"
   safe_copy '.vimrc' "$HOME_DIR"
 
-  # copy pystartup
   safe_copy '.pystartup' "$HOME_DIR"
 
-  # copy bashrc
   safe_copy '.bashrc' "$HOME_DIR"
+
+  safe_copy '.flake8' "$HOME_DIR"
 
   . "$HOME_DIR/.bashrc"
 
