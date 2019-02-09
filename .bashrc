@@ -14,8 +14,10 @@
 # paths relative to home directory
 extrapath='
 bin
+opt/crfpp
 opt/packer/bin
 .local/bin
+opt/scala-2.12/bin
 '
 
 for dn in $extrapath; do
@@ -33,11 +35,20 @@ for fn in $extrasource; do
   fi
 done
 
-#export GOPATH=$HOME/src/gocode
-
-#export JAVA_HOME=/usr/lib/jvm/oracle-jdk1.7.0_67
+# gcloud tool completions
+source "$HOME/opt/google-cloud-sdk/completion.bash.inc"
+source "$HOME/opt/google-cloud-sdk/path.bash.inc"
 
 export VAGRANT_DEFAULT_PROVIDER=virtualbox
+
+# Enable history saving between REPL sessions.
+export PYTHON_STARTUP="$HOME/.pystartup"
+
+# Enabel Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+export ENVIRONMENT=development
 
 #################################################
 
@@ -45,7 +56,7 @@ export VAGRANT_DEFAULT_PROVIDER=virtualbox
 [ -z "$PS1" ] && return
 
 #################################################
-# Nothing below executed for non-interactive prompts!!!
+# Nothing below this line is executed for non-interactive shell!!!
 
 # search online cmdfu shell command repository
 cmdfu() {
@@ -78,20 +89,13 @@ unregex() {
   sed -e 's/[]\/()$*.^|[]/\\&/g' <<< "$1"
 }
 
-# make a password with 20 alphanumeric characters excluding A, B, C, x, y and z:
-#   mkpassa 20 'ABCxyz'
-mkpassa() {
-  base64 /dev/urandom | tr -d "/+$2" | dd bs="$1" count=1 status=none | xargs echo;
-}
-
-# make a password with 20 characters 0-9, a-f:
-#   mkpassb 20
-mkpassb() {
+# make a password with the characters 0-9, a-f
+mkpasshex() {
   xxd -p /dev/urandom | dd bs="$1" count=1 status=none | xargs echo;
 }
 
-# make a password with 20 alphanumeric characters excluding easily confusable ones:
-mkpassc() {
+# make a password with alphanumeric characters excluding easily confusable ones
+mkpass() {
   base64 /dev/urandom | tr -d "/+1lIo0Oq" | dd bs="$1" count=1 status=none | xargs echo;
 }
 
@@ -102,23 +106,45 @@ encrypt() {
 
 # decrypt a file and print to stdout
 decrypt() {
-  openssl enc -d -aes-256-cbc -salt -in "$1";
+  openssl enc -d -aes-256-cbc -in "$1";
 }
 
+# encrypt a file using SSH key as password
 encrypt_ssh() {
   openssl enc -aes-256-cbc -salt -kfile ~/.ssh/id_rsa -in "$1";
 }
 
+# decrypt a file using SSH key as password
 decrypt_ssh() {
    openssl enc -d -aes-256-cbc -salt -kfile ~/.ssh/id_rsa -in "$1";
  } 
 
+expz_tensorflow() {
+  docker run --rm -it --name tensorflow -p 8888:8888 -v `pwd`:/home/jovyan:z -v /home/user/nosync/data:/mnt:z expz/tensorflow-notebook
+}
+
+tensorflow() {
+  docker run --rm -it --name tensorflow -p 8888:8888 -v `pwd`:/home/jovyan:z -v /home/user/nosync/data:/mnt:z jupyter/tensorflow-notebook:latest
+  # docker run --rm -it --name tensorflow -p 8888:8888 -v `pwd`:/notebooks:z tensorflow/tensorflow:latest-py3
+}
+
+# Recursively lookup IPs for a domain. Example usage for Google Cloud servers:
+#
+#   iplookup _cloud-netblocks.googleusercontent.com | tr -s ' ' | sed -e 's/^[ ]\+//g' | tr ' ' '\n'
+#
+iplookup() {
+  TXT="$(nslookup -q=TXT $1 8.8.8.8 | grep "$1" | sed -e 's/^[^"]*"\([^"]*\)".*/\1/g' -e 's/ip6:[^ ]*//g')"
+  DNS="$(echo $TXT | grep -o 'include:[^ ]*' | sed -e 's/include://g')"
+  echo $TXT | sed -e 's/v=spf1//g' -e 's/\?all//g' -e 's/ip4://g' -e 's/include:[^ ]*//g'
+  if [ -n "$DNS" ]; then
+    for dn in $DNS; do
+      iplookup "$dn"
+    done
+  fi
+}
+
 #################################################
 # Shell Options
-
-# Stop less from clearing screen after quitting
-# WARNING: This breaks color coding
-# export LESS=X
 
 # Set prompt
 #  \e[0m anywhere => Makes the newline not work
@@ -161,18 +187,12 @@ HISTFILESIZE=100000
 if [ -x /usr/bin/dircolors ]; then
   test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
   alias ls='ls -A --color=auto --group-directories-first'
-  alias lss='(export LC_ALL="C"; ls -A --color=auto --group-directories-first)'
-  alias lst='(export LC_ALL="C"; ls -Aal --color=auto --group-directories-first)'
-
   alias grep='grep --color=auto'
   alias fgrep='fgrep --color=auto'
   alias egrep='egrep --color=auto'
+else
+  alias ls='ls -A --color=auto --group-directories-first'
 fi
-
-# Aliases
-alias ll='ls -AlF'
-alias la='ls -A'
-alias ii='sudo apt-get install'
 
 ##################################################
 # XWindows Options
@@ -180,23 +200,11 @@ alias ii='sudo apt-get install'
 # Remap caps lock to escape key
 setxkbmap -option caps:escape
 
-# Remap CAPS_LOCK to SUPER (Mac/Windows Key)
-# WARNING: This changes the XWindows key mapping in all applications
-#cat | xmodmap - <<DELIM
-#remove Lock = Caps_Lock
-#remove mod3 = Super_L
-#keysym 0x42 = Super_L
-#add mod3 = Super_L
-#DELIM
+##################################################
+# Bash Completion
 
-#xmodmap -e "clear Lock" -e "keycode 0x42 = Super_L"
+# prerequisite for completions
+. /etc/bash_completion
 
-# If this is an xterm set the title to user@host:dir
-#case "$TERM" in
-#xterm*|rxvt*)
-#    PS1="\[\e]0;\u@\h:\w\]"
-#    ;;
-#*)
-#    ;;
-#esac
-
+# kubectl completions
+source "$HOME/.kube/completion.bash.inc"

@@ -5,8 +5,18 @@ A linux profile with a considerate install script and a conservative vim configu
 ```
 install
 
-installs profile and saves existing files to backups copies in the same
-directory with the suffix '-replaced-[DATE]'.
+installs the following files and folders:
+
+  ~/.vim
+  ~/.vundle
+  ~/.vimrc
+  ~/.bashrc
+  ~/.pystartup
+
+while saving existing files first to backups copies in the same
+directory with the suffix '-replaced-[TIMESTAMP]'.
+
+also copy scripts from the bin directory into ~/bin.
 
 If there are errors, make sure you executed a recursive clone of the git repo:
 
@@ -26,12 +36,13 @@ usage: install [--clean|--only-clean|--help]
   + asks for confirmation at each step
 * __vim config__ in conservative form with a few vundle plugins (many more can be uncommented in .vimrc)
 * __bashrc__ with a few functions
-  + e.g., for making passwords `mkpassc LENGTH`
+  + e.g., for making passwords `mkpass LENGTH`
   + and encrypting `encrypt FILENAME`
   + and searching cmdfu repository `cmdfu SEARCH TERMS`
-  + and ssh over rsync `ssync SOURCE_DIR USER@DESTINATION_IP:DESTINATION_DIR`
-* user __bin directory__ with a few scripts:
-  + especially a __nifty ftp transfer script__ `ftpcmd`
+  + and running a jupyter notebook in the current directory `tensorflow`
+  + changes `*` to match dot-files
+  + changes `ls` to add `-A` and `--group-directories-first`
+* user __bin directory__ with a few scripts
 
 ## Installation
 
@@ -47,7 +58,7 @@ usage: install [--clean|--only-clean|--help]
 
 ### Linux Profile
 
-The install script backs up the current `~/.bashrc`, `~/.vimrc`, `~/.vim/` and `~/.vundle/` by appending a suffix like `-replaced-YYYY-MM-DD`. Then it copies new versions in their place.
+The install script backs up the current `~/.pystartup`, `~/.bashrc`, `~/.vimrc`, `~/.vim/` and `~/.vundle/` by appending a suffix like `-replaced-YYYY-MM-DD`. Then it copies new versions in their place.
 
 ```
 cd ~

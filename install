@@ -52,8 +52,18 @@ case "$1" in
   *)
     INSTALL=false
     CLEAN=false
-    printf "installs profile and saves existing files to backups copies in the same
-directory with the suffix '-replaced-[DATE]'.
+    printf "installs the following files and folders:
+
+  ~/.vim
+  ~/.vundle
+  ~/.vimrc
+  ~/.bashrc
+  ~/.pystartup
+
+while saving existing files first to backups copies in the same
+directory with the suffix '-replaced-[TIMESTAMP]'.
+
+also copy scripts from the bin directory into ~/bin.
 
 If there are errors, make sure you executed a recursive clone of the git repo:
 
@@ -72,20 +82,25 @@ esac
 
 if "$INSTALL"; then
   # create bin and tmp directories
-  mkdir -p ~/bin
-  mkdir -p ~/tmp/vim/{backup,swap,undo}
-  chmod -R 700 ~/tmp/vim
+  mkdir -p "$HOME_DIR/bin"
+  mkdir -p "$HOME_DIR/tmp/vim/{backup,swap,undo}"
+  chmod -R 700 "$HOME_DIR/tmp/vim"
 
   # copy bin without overwriting
-  cp -nR "$ROOT_DIR"/bin/* ~/bin/
+  cp -nR "$ROOT_DIR"/bin/* "$HOME_DIR/bin/"
 
   # copy vim plugins and settings
   safe_copy '.vim' "$HOME_DIR"
   safe_copy '.vundle' "$HOME_DIR"
   safe_copy '.vimrc' "$HOME_DIR"
 
+  # copy pystartup
+  safe_copy '.pystartup' "$HOME_DIR"
+
   # copy bashrc
   safe_copy '.bashrc' "$HOME_DIR"
+
+  . "$HOME_DIR/.bashrc"
 
   # install plugins using vundle
   vim +BundleInstall +qall
