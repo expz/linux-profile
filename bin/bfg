@@ -1,0 +1,5 @@
+#!/bin/bash
+
+BFG_JAR="$HOME/opt/bfg/bfg.jar"
+
+java -jar "$BFG_JAR" "$@"
