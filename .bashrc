@@ -65,6 +65,9 @@ fi
 #################################################
 # Nothing below this line is executed for non-interactive shell!!!
 
+# SSH via password
+alias sshpwd='ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no'
+
 # search online cmdfu shell command repository
 cmdfu() {
   searchstr=$(echo -n "$@" | sed 's/ /-/g')
